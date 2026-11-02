@@ -1,0 +1,14 @@
+.vscode/
+admin/.env
+user/.env
+.env
+.roo
+database_backup/
+node_modules/
+**/node_modules/
+tests/.cache/
+tests/evidence/
+evidence/
+coverage/
+*.log
+jmeter.log

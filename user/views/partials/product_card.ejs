@@ -1,0 +1,71 @@
+<%# Partial cho một thẻ sản phẩm %>
+<%
+  let imgSrc = '/img/product-placeholder.png';
+  if (product && product.image) {
+    if (typeof product.image === 'string' && product.image.trim().length > 0) {
+      imgSrc = product.image;
+    } else if (product.image.imageData) {
+      const type = product.image.imageType || 'image/jpeg';
+      const b64 = (typeof product.image.imageData === 'string')
+        ? product.image.imageData
+        : product.image.imageData.toString('base64');
+      imgSrc = `data:${type};base64,${b64}`;
+    }
+  }
+%>
+<div class="single-product">
+  <div class="product-img position-relative">
+    <a href="/products/<%= encodeURIComponent(product.name) %>">
+      <img src="<%= imgSrc %>" alt="<%= product.name %>" class="img-fluid" />
+    </a>
+    <button class="wishlist-btn<% if (typeof wishlist !== 'undefined' && wishlist && wishlist.includes(product.name)) { %> active<% } %>" data-product-name="<%= product.name %>" title="<%= (typeof wishlist !== 'undefined' && wishlist && wishlist.includes(product.name)) ? 'Bỏ khỏi yêu thích' : 'Thêm vào yêu thích' %>">
+      <i class="fas fa-heart"></i>
+    </button>
+    <% if (product.isNew) { %>
+      <div class="new-product"><span>Mới</span></div>
+    <% } %>
+    <% if (product.isOutOfStock) { %>
+      <div class="badge badge-danger" style="position:absolute;top:12px;left:12px;z-index:2;font-size:0.9rem;padding:6px 14px;border-radius:16px;">Hết hàng</div>
+    <% } %>
+    <% if (product.originalPrice && product.originalPrice > product.price) { %>
+      <div class="discount-badge">-<%= Math.round(100 - (product.price / product.originalPrice) * 100) %>%</div>
+    <% } %>
+  </div>
+  <div class="product-caption text-center">
+    <h4 class="mb-2">
+      <a href="/products/<%= encodeURIComponent(product.name) %>"><%= product.name %></a>
+    </h4>
+    <div class="product-ratting mb-2">
+      <% 
+        const displayRating = typeof product.displayRating !== 'undefined' ? product.displayRating : 0;
+        const avgRating = typeof product.rating !== 'undefined' ? product.rating : 0;
+        const totalReviews = typeof product.ratingCount !== 'undefined' ? product.ratingCount : (product.reviewProducts ? product.reviewProducts.length : 0);
+        const rounded = Math.round(avgRating * 10) / 10;
+      %>
+      <% for(let i = 0; i < 5; i++) { %>
+        <% if (i < displayRating) { %>
+          <i class="fas fa-star"></i>
+        <% } else { %>
+          <i class="far fa-star"></i>
+        <% } %>
+      <% } %>
+      <% if (totalReviews > 0) { %>
+        <span style="font-size:0.85rem;color:#888;margin-left:4px;">(<%= rounded %>/5)</span>
+      <% } else { %>
+        <span class="text-muted" style="font-size:0.85rem;margin-left:4px;">(Chưa có đánh giá)</span>
+      <% } %>
+    </div>
+    <div class="price">
+      <ul class="list-unstyled mb-0">
+        <li><%= product.price ? product.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) : 'Liên hệ' %></li>
+        <% if (product.originalPrice && product.originalPrice > product.price) { %>
+          <li class="discount"><%= product.originalPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) %></li>
+        <% } %>
+      </ul>
+    </div>
+    <% if (product.isOutOfStock) { %>
+      <div class="text-danger font-weight-bold mb-2">Hết hàng</div>
+    <% } %>
+    <a href="/products/<%= encodeURIComponent(product.name) %>" class="view-detail-btn">Xem chi tiết</a>
+  </div>
+</div>

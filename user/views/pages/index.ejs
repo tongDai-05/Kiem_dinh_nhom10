@@ -1,0 +1,101 @@
+<%- include('../partials/header', { title: title, categories: typeof categories !== 'undefined' ? categories : [] }) %>
+
+<!-- Header đã include ở trên -->
+
+<main>
+    <!-- slider Area Start -->
+    <div class="slider-area ">
+        <div class="slider-active">
+            <div class="single-slider slider-height" data-background="/img/hero/h1_hero.jpg">
+                <div class="container">
+                    <div class="row d-flex align-items-center justify-content-between">
+                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 d-none d-md-block">
+                            <div class="hero__img" data-animation="bounceIn" data-delay=".4s">
+                                <img src="/img/hero/hero_man.png" alt="">
+                            </div>
+                        </div>
+                        <div class="col-xl-5 col-lg-5 col-md-5 col-sm-8">
+                            <div class="hero__caption">
+                                <span data-animation="fadeInRight" data-delay=".4s">60% Discount</span>
+                                <h1 data-animation="fadeInRight" data-delay=".6s">Winter <br> Collection</h1>
+                                <p data-animation="fadeInRight" data-delay=".8s">Best Cloth Collection By 2020!</p>
+                                <!-- Hero-btn -->
+                                <div class="hero__btn" data-animation="fadeInRight" data-delay="1s">
+                                    <a href="/products" class="btn hero-btn">Shop Now</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- slider Area End-->
+    <!-- Category Area Start-->
+    <section class="category-area section-padding30">
+        <div class="container-fluid">
+            <!-- Section Tittle -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section-tittle text-center mb-85">
+                        <h2>Danh Mục Sản Phẩm</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                    <% categories.forEach((category, idx) => { %>
+                        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 mb-30">
+                            <div class="single-category">
+                                <div class="category-img position-relative" style="overflow: hidden; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                    <a href="/products/category/<%= category._id %>">
+                                        <img src="<%= (category.image && category.image.imageData) ? `data:${category.image.imageType};base64,${category.image.imageData.toString('base64')}` : `/img/categori/cat${(idx % 3) + 1}.jpg` %>" alt="<%= category.name %>" style="height: 320px; width: 100%; object-fit: cover; transition: transform 0.4s ease;">
+                                    </a>
+                                    <div class="category-caption" style="position: absolute; bottom: 20px; left: 20px; right: 20px; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(8px); padding: 15px 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                                        <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; color: #111;"><%= category.name %></h2>
+                                        <span class="best"><a href="/products/category/<%= category._id %>" style="color: #256DFF; font-weight: 600; font-size: 0.95rem;">Xem bộ sưu tập &rarr;</a></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="col-12"><p class="text-center">Đang cập nhật danh mục...</p></div>
+                <% } %>
+            </div>
+        </div>
+    </section>
+    <!-- Category Area End-->
+    <!-- Popular Items Start -->
+    <section class="popular-items latest-product-area section-padding30">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-xl-7 col-lg-8 col-md-10">
+                    <div class="section-tittle mb-70 text-center">
+                        <h2>Sản Phẩm Nổi Bật</h2>
+                        <p>Đây là những sản phẩm đang được ưa chuộng nhất tại cửa hàng của chúng tôi.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <% if (typeof popularProducts !== 'undefined' && popularProducts.length > 0) { %>
+                    <% popularProducts.forEach(product => { %>
+                        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-4">
+                            <%- include('../partials/product_card', { product: product }) %>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="col-12"><p class="text-center">Chưa có sản phẩm nổi bật nào.</p></div>
+                <% } %>
+            </div>
+            <div class="row justify-content-center">
+                <div class="room-btn pt-70">
+                    <a href="/products" class="btn view-btn1">Xem Tất Cả Sản Phẩm</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Popular Items End -->
+</main>
+
+<%- include('../partials/footer') %>

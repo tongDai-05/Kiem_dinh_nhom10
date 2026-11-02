@@ -1,0 +1,14 @@
+services:
+  mongo1:
+    image: mongo:latest
+    container_name: mongo1
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
+    external: true
+    name: 5ce881bd0cd64f6ea7b8e1ef1569edab9d88845929bb403e560cf6a37fb3bf0c

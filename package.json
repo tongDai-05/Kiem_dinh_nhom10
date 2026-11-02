@@ -1,0 +1,31 @@
+{
+  "name": "website-ban-quan-ao",
+  "version": "1.0.0",
+  "description": "Website Thuong Mai Dien Tu - Node.js, Express, MongoDB",
+  "private": true,
+  "scripts": {
+    "db": "docker start mongo1",
+    "db:up": "docker-compose up -d mongo1",
+    "db:stop": "docker stop mongo1",
+    "user": "npm start --prefix user",
+    "admin": "npm start --prefix admin",
+    "test": "node tests/selenium/run.cjs",
+    "test:selenium": "node tests/selenium/run.cjs",
+    "test:selenium:headed": "node tests/selenium/run.cjs --headed",
+    "test:blackbox": "node tests/selenium/run.cjs --suite=blackbox",
+    "test:postman": "node tests/postman/run.cjs",
+    "postman:local": "node tests/postman/run.cjs --serve",
+    "test:advanced": "node tests/advanced/run.cjs",
+    "test:unit": "jest --config tests/unit/jest.config.cjs --runInBand",
+    "test:coverage": "jest --config tests/unit/jest.config.cjs --runInBand --coverage",
+    "test:load": "node tests/load/run.cjs",
+    "test:jmeter": "node tests/jmeter/run.cjs"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0",
+    "mongodb-memory-server": "10.2.3",
+    "newman": "6.2.3",
+    "selenium-webdriver": "4.35.0",
+    "supertest": "^7.1.4"
+  }
+}

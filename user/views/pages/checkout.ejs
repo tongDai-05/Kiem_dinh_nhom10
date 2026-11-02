@@ -1,0 +1,131 @@
+<%- include('../partials/header', { title: title }) %>
+<link rel="stylesheet" href="/css/checkout-modern.css">
+<div class="container checkout-modern-container">
+  <form action="/order/quick-order" method="POST" class="row checkout-modern-form" id="checkoutForm" autocomplete="off" novalidate>
+    <div class="col-lg-7 mb-4 mb-lg-0">
+      <div class="checkout-modern-title">Thông Tin Giao Hàng</div>
+      <div class="row">
+        <div class="col-md-6">
+          <label for="firstName">Họ <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="firstName" name="firstName" placeholder="Nhập họ" required />
+        </div>
+        <div class="col-md-6">
+          <label for="lastName">Tên <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Nhập tên" required />
+        </div>
+        <div class="col-md-12">
+          <label for="address">Địa chỉ <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="address" name="address" placeholder="Nhập địa chỉ nhận hàng" required />
+        </div>
+        <div class="col-md-6">
+          <label for="phone">Số điện thoại <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="phone" name="phone" placeholder="Nhập số điện thoại" required pattern="[0-9]{9,12}" />
+        </div>
+        <div class="col-md-6">
+          <label for="email">Email <span class="text-danger">*</span></label>
+          <input type="email" class="form-control" id="email" name="email" placeholder="Nhập email" required />
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="checkout-modern-summary">
+        <h2>Đơn Hàng Của Bạn</h2>
+        <ul class="list">
+          <% if (cart && cart.length > 0) { %>
+            <% cart.forEach(item => { 
+              const p = item.product || {}; 
+              const name = p.name || item.name || '';
+              const quantity = item.quantity || item.qty || 1;
+              let price = 0;
+              if (typeof p.detail === 'object' && p.detail && p.detail[0]) {
+                price = typeof p.detail[0].price === 'string' ? parseFloat(p.detail[0].price) : p.detail[0].price;
+              } else if (typeof item.price !== 'undefined') {
+                price = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
+              }
+              let image = '';
+              if (typeof p.image === 'string' && p.image.startsWith('data:')) {
+                image = p.image;
+              } else if (p.image && p.image.imageData && p.image.imageType) {
+                let base64 = '';
+                if (typeof p.image.imageData === 'string') {
+                  base64 = p.image.imageData;
+                } else if (p.image.imageData && typeof p.image.imageData.toString === 'function') {
+                  base64 = p.image.imageData.toString('base64');
+                }
+                image = base64 ? `data:${p.image.imageType};base64,${base64}` : '';
+              } else if (typeof item.image === 'string' && item.image.startsWith('data:')) {
+                image = item.image;
+              } else if (item.image && item.image.imageData && item.image.imageType) {
+                let base64 = '';
+                if (typeof item.image.imageData === 'string') {
+                  base64 = item.image.imageData;
+                } else if (item.image.imageData && typeof item.image.imageData.toString === 'function') {
+                  base64 = item.image.imageData.toString('base64');
+                }
+                image = base64 ? `data:${item.image.imageType};base64,${base64}` : '';
+              }
+            %>
+              <li>
+                <span class="d-flex align-items-center">
+                  <% if (image) { %>
+                    <img src="<%= image %>" alt="<%= name %>" />
+                  <% } else { %>
+                    <img src="/img/no-image.png" alt="No image" />
+                  <% } %>
+                  <span><%= name %> x <%= quantity %></span>
+                </span>
+                <span class="fw-bold text-danger"><%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format((price || 0) * quantity) %></span>
+              </li>
+            <% }); %>
+          <% } else { %>
+            <li>Không có sản phẩm trong giỏ hàng.</li>
+          <% } %>
+        </ul>
+        <ul class="list list_2">
+          <li><span>Tổng</span> <span><%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(cartTotal || 0) %></span></li>
+        </ul>
+        <button type="submit" class="btn-checkout-modern">Đặt Hàng</button>
+      </div>
+    </div>
+    <% if (typeof buyNow !== 'undefined' && buyNow && cart && cart.length === 1) { %>
+      <input type="hidden" name="buyNow" value="1">
+      <input type="hidden" name="productId" value="<%= cart[0].product._id %>">
+      <input type="hidden" name="name" value="<%= cart[0].product.name %>">
+      <input type="hidden" name="type" value="<%= cart[0].product.type %>">
+      <input type="hidden" name="size" value="<%= cart[0].product.detail[0].size %>">
+      <input type="hidden" name="price" value="<%= cart[0].product.detail[0].price %>">
+      <input type="hidden" name="quantity" value="<%= cart[0].quantity %>">
+      <input type="hidden" name="image" value="<%= cart[0].product.image %>">
+    <% } %>
+  </form>
+</div>
+<script>
+// Validate bắt buộc các trường trước khi submit
+const checkoutForm = document.getElementById('checkoutForm');
+if (checkoutForm) {
+  checkoutForm.addEventListener('submit', function(e) {
+    let valid = true;
+    checkoutForm.querySelectorAll('input[required]').forEach(input => {
+      if (!input.value.trim()) {
+        input.classList.add('is-invalid');
+        valid = false;
+      } else {
+        input.classList.remove('is-invalid');
+      }
+    });
+    // Validate phone
+    const phone = checkoutForm.querySelector('input[name="phone"]');
+    if (phone && !/^\d{9,12}$/.test(phone.value.trim())) {
+      phone.classList.add('is-invalid');
+      valid = false;
+    }
+    if (!valid) {
+      e.preventDefault();
+      e.stopPropagation();
+      Swal && Swal.fire({ icon: 'warning', title: 'Vui lòng nhập đầy đủ và đúng thông tin giao hàng!' });
+      return false;
+    }
+  });
+}
+</script>
+<%- include('../partials/footer') %>

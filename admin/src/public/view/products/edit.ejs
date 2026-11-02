@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- head -->
+<%- include('../partials/head') %>
+
+    <body>
+        <div class="wrapper">
+            <!-- Sidebar -->
+            <%- include('../partials/sidebar') %>
+                <div class="main-panel">
+                    <div class="main-header">
+                        <div class="main-header-logo">
+                            <!-- Logo Header -->
+                            <div class="logo-header" data-background-color="dark">
+                                <div class="nav-toggle">
+                                    <button class="btn btn-toggle toggle-sidebar">
+                                        <i class="gg-menu-right"></i>
+                                    </button>
+                                    <button class="btn btn-toggle sidenav-toggler">
+                                        <i class="gg-menu-left"></i>
+                                    </button>
+                                </div>
+                                <button class="topbar-toggler more">
+                                    <i class="gg-more-vertical-alt"></i>
+                                </button>
+                            </div>
+                            <!-- End Logo Header -->
+                        </div>
+                        <!-- Navbar Header -->
+                        <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
+                            <div class="container-fluid">
+                                <nav
+                                    class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <button type="submit" class="btn btn-search pe-1">
+                                                <i class="fa fa-search search-icon"></i>
+                                            </button>
+                                        </div>
+                                        <input type="text" placeholder="Tìm kiếm..." class="form-control" />
+                                    </div>
+                                </nav>
+                            </div>
+                        </nav>
+                        <!-- End Navbar -->
+                    </div>
+
+                    <div class="container">
+                        <div class="page-inner">
+                            <div class="page-header">
+                                <h3 class="fw-bold mb-3">Biểu mẫu</h3>
+                            </div>
+                            <% product.forEach(item=>{ %>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card">
+                                            <!-- Name Form -->
+                                            <div class="card-header">
+                                                <div class="d-flex align-items-center">
+                                                    <%- include('../partials/name-form') %>
+                                                        <a href="/products" class="btn btn-danger btn-round ms-auto">
+                                                            <i class="fa fa-arrow-left"></i>
+                                                            Quay lại
+                                                        </a>
+                                                </div>
+                                            </div>
+                                            <form action="/products/update" method="post" enctype="multipart/form-data">
+                                                <input type="hidden" name="id" value="<%=item.id %>">
+                                                <input type="hidden" name="redirect" value="<%=item.name %>">
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-12 col-lg-12">
+
+                                                            <div class="form-group" style="text-align: center;">
+                                                                <img style="width: 450px;height: 200px;object-fit: contain;"
+                                                                    src="/products/image/<%=item.id%>"
+                                                                    alt="<%=item.image?.imageName%>">
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                <label for="name">Tên sản phẩm</label>
+                                                                <input type="text" name="name" value="<%=item.name %>"
+                                                                    class="form-control" id="name" placeholder="Nhập tên sản phẩm" />
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="description">Mô tả sản phẩm</label>
+                                                                <input type="text" name="description"
+                                                                    value="<%=item.description %>" class="form-control"
+                                                                    id="description" placeholder="Nhập mô tả sản phẩm" />
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="type">Loại / Màu sắc</label>
+                                                                <input type="text" name="type" value="<%=item.type %>"
+                                                                    class="form-control" id="type" placeholder="Nhập loại (Ví dụ: Màu đen...)" />
+                                                            </div>
+                                                            <style>
+                                                                .seven-col {
+                                                                    width: calc(100% / 7);
+                                                                    float: left;
+                                                                    text-align: center;
+                                                                    padding: 0;
+
+                                                                }
+
+                                                                .size-border {
+                                                                    border: 1px solid #00000029;
+                                                                    border-radius: 5px;
+                                                                    padding: 7px;
+                                                                    user-select: none;
+                                                                    font-weight: bold;
+                                                                    color: darkgray;
+                                                                }
+                                                            </style>
+                                                            <div class="form-group">
+                                                                <label for="size">Kích cỡ (Size)</label>
+                                                                <div class="container">
+                                                                    <div class="row">
+                                                                        <div class="seven-col size-border">XS</div>
+                                                                        <div class="seven-col size-border">S</div>
+                                                                        <div class="seven-col size-border">M</div>
+                                                                        <div class="seven-col size-border">L</div>
+                                                                        <div class="seven-col size-border">XL</div>
+                                                                        <div class="seven-col size-border">XXL</div>
+                                                                        <div class="seven-col size-border">XXXL</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="price">Giá bán theo Size (VNĐ)</label>
+                                                                <div class="container">
+                                                                    <div class="row">
+                                                                        <% item.detail.forEach(detail=>{ %>
+                                                                            <div class="seven-col"><input type="number"
+                                                                                    step="any"
+                                                                                    name="price[<%=detail.size %>]"
+                                                                                    value="<%=detail.price %>"
+                                                                                    class="form-control"
+                                                                                    placeholder="Giá <%=detail.size %>" />
+                                                                            </div>
+                                                                            <% }) %>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="stock">Số lượng tồn kho theo Size</label>
+                                                                <div class="container">
+                                                                    <div class="row">
+                                                                        <% item.detail.forEach(detail=>{ %>
+                                                                            <div class="seven-col"><input type="number"
+                                                                                    step="any"
+                                                                                    name="stock[<%=detail.size %>]"
+                                                                                    value="<%=detail.stock %>"
+                                                                                    class="form-control"
+                                                                                    placeholder="Kho <%=detail.size %>" />
+                                                                            </div>
+                                                                            <% }) %>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="image">Hình ảnh sản phẩm mới (chọn nếu muốn đổi ảnh)</label>
+                                                                <input type="file" name="image"
+                                                                    class="form-control-file" id="image" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-action">
+                                                    <button class="btn btn-success">Lưu thay đổi</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }) %>
+
+                        </div>
+                    </div>
+                    <!-- Footer -->
+                    <%- include('../partials/footer') %>
+                </div>
+        </div>
+        <!-- Table Script -->
+        <%- include('../partials/table-script') %>
+            <!-- My Script -->
+            <%- include('../partials/my-script') %>
+    </body>
+
+</html>

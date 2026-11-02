@@ -1,0 +1,3082 @@
+{
+  "info": {
+    "name": "Website quần áo - Kiểm thử Postman",
+    "description": "24 ca API trên database tạm riêng. Chạy npm run test:postman để kiểm thử toàn bộ. Trong Postman Desktop, khởi động môi trường với --serve --case=API-xx rồi chọn đúng thư mục đó. Không dùng dữ liệu đang vận hành.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const allowed=pm.environment.get('active_case');",
+          "const current=pm.info.requestName.split(' | ')[0];",
+          "const urls=['user_url','admin_url'].map(k=>pm.environment.get(k)||'');",
+          "if (!allowed || current!==allowed || !urls.every(u=>/^http:\\/\\/(127\\.0\\.0\\.1|localhost):[1-9][0-9]{3,4}$/.test(u))) {",
+          "  pm.execution.skipRequest(); console.warn('Chỉ chạy thư mục active_case trong môi trường kiểm thử tạm đã chuẩn bị.');",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "API-01 Khách chưa đăng nhập không được xem hồ sơ",
+      "description": "Dữ liệu: Không gửi phiên đăng nhập; yêu cầu nhận JSON.\nMong đợi: Máy chủ trả 401 và success bằng false; không trả thông tin hồ sơ.\nPhạm vi: Một yêu cầu đọc hồ sơ ở phiên mới, đối chiếu mã HTTP, JSON và nội dung riêng tư.",
+      "item": [
+        {
+          "name": "API-01 | 01 | Đọc hồ sơ khi chưa đăng nhập",
+          "request": {
+            "method": "GET",
+            "url": "{{user_url}}/auth/profile",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 401\",()=>pm.expect(pm.response.code).to.be.oneOf([401]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(false));",
+                  "pm.test('Không có thông tin khách A trong phản hồi', () => { pm.expect(pm.response.text()).not.to.include(pm.environment.get('user_account')); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-02 Đăng nhập đúng, đăng xuất và phát lại phiên cũ",
+      "description": "Dữ liệu: Tài khoản khách A và mật khẩu thử hợp lệ; lưu cookie do chính lượt đăng nhập cấp để phát lại sau đăng xuất.\nMong đợi: Đăng nhập mở đúng hồ sơ; sau đăng xuất, cả phiên mới lẫn cookie cũ đều bị từ chối với 401.\nPhạm vi: Kiểm tra đăng nhập bằng tên, nội dung hồ sơ, hủy phiên và một lượt phát lại cookie cũ; không ghi giá trị cookie trong báo cáo.",
+      "item": [
+        {
+          "name": "API-02 | 01 | Đăng nhập user",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{user_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/?login_success=1\"));",
+                  "const raw = pm.response.headers.all().filter(h => h.key.toLowerCase() === 'set-cookie').map(h => h.value).join('; '); const match = raw.match(/(?:^|;\\s*)(connect\\.sid=[^;]+)/); pm.test('Đăng nhập cấp cookie phiên', () => { pm.expect(Boolean(match)).to.equal(true); }); if (match) pm.environment.set('old_session', match[1]);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-02 | 02 | Đọc hồ sơ sau đăng nhập",
+          "request": {
+            "method": "GET",
+            "url": "{{user_url}}/auth/profile",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 200\",()=>pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Hồ sơ đúng khách A', () => { pm.expect(pm.response.text()).to.include(pm.environment.get('user_account')); });",
+                  "pm.test('Hồ sơ không hiển thị mật khẩu thử', () => { pm.expect(pm.response.text()).not.to.include(pm.environment.get('password')); });",
+                  "pm.test('Hồ sơ không hiển thị chuỗi băm bcrypt', () => { pm.expect(pm.response.text()).not.to.match(/\\$2[aby]\\$\\d{2}\\$/); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-02 | 03 | Đăng xuất khách hàng",
+          "request": {
+            "method": "GET",
+            "url": "{{user_url}}/auth/logout",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-02 | 04 | Đọc hồ sơ sau đăng xuất",
+          "request": {
+            "method": "GET",
+            "url": "{{user_url}}/auth/profile",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 401\",()=>pm.expect(pm.response.code).to.be.oneOf([401]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-02 | 05 | Phát lại cookie cũ sau đăng xuất",
+          "request": {
+            "method": "GET",
+            "url": "{{user_url}}/auth/profile",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "{{old_session}}"
+              }
+            ]
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 401\",()=>pm.expect(pm.response.code).to.be.oneOf([401]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-03 Đăng nhập bằng email vào đúng tài khoản",
+      "description": "Dữ liệu: Email khách A và mật khẩu thử hợp lệ.\nMong đợi: Đăng nhập chuyển về trang chủ; hồ sơ có tên đăng nhập của cùng khách A, không lộ mật khẩu.\nPhạm vi: Một lượt đăng nhập bằng email, đọc hồ sơ rồi đăng xuất.",
+      "item": [
+        {
+          "name": "API-03 | 01 | Đăng nhập khách A bằng email",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{user_email}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/?login_success=1\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-03 | 02 | Hồ sơ sau đăng nhập bằng email",
+          "request": {
+            "method": "GET",
+            "url": "{{user_url}}/auth/profile",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 200\",()=>pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Hồ sơ đúng khách A', () => { pm.expect(pm.response.text()).to.include(pm.environment.get('user_account')); });",
+                  "pm.test('Hồ sơ không hiển thị mật khẩu thử', () => { pm.expect(pm.response.text()).not.to.include(pm.environment.get('password')); });",
+                  "pm.test('Hồ sơ không hiển thị chuỗi băm bcrypt', () => { pm.expect(pm.response.text()).not.to.match(/\\$2[aby]\\$\\d{2}\\$/); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-03 | 03 | Đăng xuất khách hàng",
+          "request": {
+            "method": "GET",
+            "url": "{{user_url}}/auth/logout",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-04 Sai hoặc thiếu thông tin đăng nhập không được cấp quyền",
+      "description": "Dữ liệu: Một lượt sai mật khẩu; một lượt thiếu tên đăng nhập; một lượt thiếu mật khẩu.\nMong đợi: Sai mật khẩu chuyển về đăng nhập. Thiếu trường trả 422. Mỗi lượt đều không được đọc hồ sơ.\nPhạm vi: Ba yêu cầu đăng nhập không hợp lệ và kiểm tra quyền ngay sau từng yêu cầu; chưa bao quát mọi độ dài hoặc kiểu dữ liệu.",
+      "item": [
+        {
+          "name": "API-04 | 01 | Đăng nhập sai mật khẩu",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{user_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "PostmanPasswordWrong!",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/auth/login\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-04 | 02 | Hồ sơ sau mật khẩu sai vẫn bị chặn",
+          "request": {
+            "method": "GET",
+            "url": "{{user_url}}/auth/profile",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 401\",()=>pm.expect(pm.response.code).to.be.oneOf([401]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-04 | 03 | Đăng nhập thiếu tài khoản",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 422\",()=>pm.expect(pm.response.code).to.be.oneOf([422]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-04 | 04 | Hồ sơ sau lượt thiếu tài khoản vẫn bị chặn",
+          "request": {
+            "method": "GET",
+            "url": "{{user_url}}/auth/profile",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 401\",()=>pm.expect(pm.response.code).to.be.oneOf([401]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-04 | 05 | Đăng nhập thiếu mật khẩu",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{user_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 422\",()=>pm.expect(pm.response.code).to.be.oneOf([422]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-04 | 06 | Hồ sơ sau lượt thiếu mật khẩu vẫn bị chặn",
+          "request": {
+            "method": "GET",
+            "url": "{{user_url}}/auth/profile",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 401\",()=>pm.expect(pm.response.code).to.be.oneOf([401]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-05 Khách chưa đăng nhập không được thêm giỏ",
+      "description": "Dữ liệu: Yêu cầu thêm sản phẩm mẫu màu Đen, cỡ M, số lượng 1 từ phiên chưa đăng nhập.\nMong đợi: Trả 401, success bằng false và giỏ của mọi tài khoản giữ nguyên.\nPhạm vi: Một yêu cầu thêm giỏ trực tiếp, kiểm tra phản hồi và giỏ trong database tạm.",
+      "item": [
+        {
+          "name": "API-05 | 01 | Thêm giỏ khi chưa đăng nhập",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/cart/add",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"productID\":\"{{product_id}}\",\"type\":\"Đen\",\"size\":\"M\",\"orderNumber\":1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 401\",()=>pm.expect(pm.response.code).to.be.oneOf([401]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-06 Thêm hai chiếc L vào giỏ bằng yêu cầu hợp lệ",
+      "description": "Dữ liệu: Khách A, giỏ rỗng; Áo Alpha Đen, M giá 120.000 đồng còn 5, L giá 150.000 đồng còn 3. Gửi số lượng 2 dạng số JSON.\nMong đợi: Máy chủ xác nhận thành công, lưu đúng một dòng L hai chiếc; chưa tạo đơn và chưa giảm kho.\nPhạm vi: Đăng nhập bằng API và thêm giỏ qua API; đối chiếu giỏ và tồn thực trong database tạm.",
+      "item": [
+        {
+          "name": "API-06 | 01 | Đăng nhập user",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{user_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/?login_success=1\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-06 | 02 | Thêm Đen L hai chiếc",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/cart/add",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"productID\":\"{{product_id}}\",\"type\":\"Đen\",\"size\":\"L\",\"orderNumber\":2}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 200\",()=>pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-07 Cộng số lượng cùng biến thể với dữ liệu JSON số",
+      "description": "Dữ liệu: Giỏ rỗng; lần lượt thêm Đen M một chiếc và hai chiếc, cả hai số lượng đều là số JSON.\nMong đợi: Hai lần thêm được hợp nhất thành một dòng M ba chiếc, không tạo hai dòng trùng nhau.\nPhạm vi: Hai lần thêm thực sự qua API; đối chiếu dữ liệu đã lưu sau lần thứ hai.",
+      "item": [
+        {
+          "name": "API-07 | 01 | Đăng nhập user",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{user_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/?login_success=1\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-07 | 02 | Thêm M một chiếc",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/cart/add",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"productID\":\"{{product_id}}\",\"type\":\"Đen\",\"size\":\"M\",\"orderNumber\":1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 200\",()=>pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-07 | 03 | Thêm tiếp M hai chiếc bằng JSON số",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/cart/add",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"productID\":\"{{product_id}}\",\"type\":\"Đen\",\"size\":\"M\",\"orderNumber\":2}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 200\",()=>pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-08 Cộng số lượng khi biểu mẫu gửi giá trị dạng chuỗi",
+      "description": "Dữ liệu: Thêm Đen M một chiếc bằng JSON số; lần thứ hai gửi orderNumber=2 bằng biểu mẫu URL-encoded.\nMong đợi: Máy chủ đọc số lượng hợp lệ và cộng thành ba chiếc; không nối chuỗi thành 12.\nPhạm vi: Đối chiếu hai kiểu dữ liệu gửi cùng một nghiệp vụ; không giả định dữ liệu biểu mẫu là số JSON.",
+      "item": [
+        {
+          "name": "API-08 | 01 | Đăng nhập user",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{user_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/?login_success=1\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-08 | 02 | Thêm M một chiếc bằng JSON số",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/cart/add",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"productID\":\"{{product_id}}\",\"type\":\"Đen\",\"size\":\"M\",\"orderNumber\":1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 200\",()=>pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-08 | 03 | Thêm tiếp M hai chiếc bằng biểu mẫu",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/cart/add",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "productID",
+                  "value": "{{product_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "type",
+                  "value": "Đen",
+                  "type": "text"
+                },
+                {
+                  "key": "size",
+                  "value": "M",
+                  "type": "text"
+                },
+                {
+                  "key": "orderNumber",
+                  "value": "2",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 200\",()=>pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-09 Thay đổi số lượng đúng dòng size L",
+      "description": "Dữ liệu: Chuẩn bị trực tiếp trong database tạm giỏ Đen M một chiếc và L hai chiếc. Gửi yêu cầu sửa L thành ba chiếc.\nMong đợi: Chỉ dòng L đổi thành ba; M vẫn một chiếc. Nhận diện dòng theo đủ sản phẩm, màu và size là tiêu chí toàn vẹn giỏ.\nPhạm vi: Giỏ ban đầu được chuẩn bị trong database; thao tác sửa được gửi qua API, có bổ sung type và size để kiểm tra có chọn đúng dòng hay không.",
+      "item": [
+        {
+          "name": "API-09 | 01 | Đăng nhập user",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{user_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/?login_success=1\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-09 | 02 | Sửa số lượng dòng L thành ba",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/cart/update",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"productId\":\"{{product_id}}\",\"type\":\"Đen\",\"size\":\"L\",\"qty\":3}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 200\",()=>pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-10 Xóa dòng L và giữ nguyên dòng M",
+      "description": "Dữ liệu: Chuẩn bị trực tiếp trong database tạm giỏ Đen M một chiếc và L hai chiếc; xóa riêng L.\nMong đợi: Dòng L được xóa; M vẫn một chiếc và tồn kho không đổi.\nPhạm vi: Thao tác xóa qua API với đủ sản phẩm, màu và size; đối chiếu toàn giỏ sau khi lưu.",
+      "item": [
+        {
+          "name": "API-10 | 01 | Đăng nhập user",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{user_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/?login_success=1\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-10 | 02 | Xóa riêng Đen L khỏi giỏ",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/cart/remove",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"productId\":\"{{product_id}}\",\"type\":\"Đen\",\"size\":\"L\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 200\",()=>pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-11 Từ chối thêm số lượng vượt tồn kho",
+      "description": "Dữ liệu: Giỏ rỗng, Đen M còn 5; gửi số lượng 6 dạng số JSON.\nMong đợi: Theo tiêu chí số lượng không vượt tồn đã đề xuất, máy chủ báo không thành công và không ghi dòng giỏ sáu chiếc.\nPhạm vi: Kiểm tra trực tiếp phía máy chủ, không phụ thuộc giới hạn ô nhập trên giao diện; không suy rộng thành đã thử tranh mua đồng thời.",
+      "item": [
+        {
+          "name": "API-11 | 01 | Đăng nhập user",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{user_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/?login_success=1\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-11 | 02 | Thử thêm sáu chiếc khi chỉ còn năm",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/cart/add",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"productID\":\"{{product_id}}\",\"type\":\"Đen\",\"size\":\"M\",\"orderNumber\":6}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: [200,400,422]\",()=>pm.expect(pm.response.code).to.be.oneOf([200,400,422]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-12 Không tin giá mua ngay do khách gửi lên",
+      "description": "Dữ liệu: Đen M có giá tin cậy 120.000 đồng, còn 5. Khách gửi mua ngay một chiếc nhưng sửa giá thành 1 đồng.\nMong đợi: Theo tiêu chí bảo vệ giá, máy chủ từ chối tạo đơn hoặc tính lại đúng giá 120.000 đồng; không tạo đơn giá 1 đồng.\nPhạm vi: Một lượt sửa giá trực tiếp trên yêu cầu JSON, trên database tạm; đối chiếu tổng và giá dòng đơn nếu đơn được tạo.",
+      "item": [
+        {
+          "name": "API-12 | 01 | Đăng nhập user",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{user_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/?login_success=1\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-12 | 02 | Mua ngay M một chiếc với giá bị sửa thành một đồng",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/order/quick-order",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"productId\":\"{{product_id}}\",\"name\":\"{{product_name}}\",\"type\":\"Đen\",\"size\":\"M\",\"price\":1,\"quantity\":1,\"shippingAddress\":{\"fullName\":\"Người nhận kiểm thử Postman\",\"address\":\"Địa chỉ giả lập Postman\",\"phone\":\"0900000099\",\"email\":\"receiver@example.test\"}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: [200,400,422]\",()=>pm.expect(pm.response.code).to.be.oneOf([200,400,422]));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-13 Đặt giỏ L hai chiếc đúng giá và đúng kho",
+      "description": "Dữ liệu: Chuẩn bị trực tiếp giỏ L hai chiếc, M còn 5 và L còn 3; địa chỉ người nhận là dữ liệu giả lập Postman.\nMong đợi: Tạo đúng một đơn L hai chiếc, giá 150.000 đồng mỗi chiếc, tổng 300.000 đồng; L còn 1, M giữ 5; giỏ được xóa.\nPhạm vi: Gửi đặt toàn giỏ qua tuyến đặt hàng chính, không gửi lại tên hoặc giá để tránh chuyển sang nhánh mua ngay.",
+      "item": [
+        {
+          "name": "API-13 | 01 | Đăng nhập user",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{user_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/?login_success=1\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-13 | 02 | Đặt toàn giỏ L hai chiếc",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/order/quick-order",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"shippingAddress\":{\"fullName\":\"Người nhận kiểm thử Postman\",\"address\":\"Địa chỉ giả lập Postman\",\"phone\":\"0900000099\",\"email\":\"receiver@example.test\"}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 200\",()=>pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-14 Đặt giỏ thất bại không làm mất kho mặt hàng trước",
+      "description": "Dữ liệu: Chuẩn bị trực tiếp giỏ A M một chiếc đứng trước B M một chiếc. A còn 5, B được đặt tồn 0 trong database tạm.\nMong đợi: Máy chủ từ chối do B hết hàng, không tạo đơn và giữ giỏ; theo tiêu chí toàn bộ hoặc không thay đổi, kho A vẫn 5 và B vẫn 0.\nPhạm vi: Một lượt đặt nhiều dòng tuần tự trên database thật dành riêng cho kiểm thử; không phải thử tranh mua hoặc chủ động gây lỗi lưu.",
+      "item": [
+        {
+          "name": "API-14 | 01 | Đăng nhập user",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{user_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/?login_success=1\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-14 | 02 | Đặt giỏ có A còn hàng trước B hết hàng",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/order/quick-order",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"shippingAddress\":{\"fullName\":\"Người nhận kiểm thử Postman\",\"address\":\"Địa chỉ giả lập Postman\",\"phone\":\"0900000099\",\"email\":\"receiver@example.test\"}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 400\",()=>pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-15 Đặt giỏ qua tuyến cũ vẫn phải đúng giá và kho",
+      "description": "Dữ liệu: Chuẩn bị trực tiếp giỏ L hai chiếc, M còn 5 và L còn 3; gửi tuyến đặt giỏ cũ.\nMong đợi: Dù đi qua tuyến đặt giỏ cũ, đơn phải có tổng 300.000 đồng, giá L 150.000 đồng, giảm L còn 1 và giữ M còn 5.\nPhạm vi: Kiểm tra riêng POST đặt giỏ cũ, phân biệt với tuyến đặt hàng chính; đối chiếu đơn và kho trong database tạm.",
+      "item": [
+        {
+          "name": "API-15 | 01 | Đăng nhập user",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{user_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/?login_success=1\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-15 | 02 | Đặt L hai chiếc qua tuyến đặt giỏ cũ",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/cart/checkout",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"shippingAddress\":{\"fullName\":\"Người nhận kiểm thử Postman\",\"address\":\"Địa chỉ giả lập Postman\",\"phone\":\"0900000099\",\"email\":\"receiver@example.test\"}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 200\",()=>pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-16 Khách A không được hủy đơn của khách B",
+      "description": "Dữ liệu: Khách A đăng nhập; gửi mã đơn Chờ duyệt thuộc khách B.\nMong đợi: Trả 403, success bằng false; đơn của B giữ chủ sở hữu, trạng thái và tổng tiền.\nPhạm vi: Một lượt hủy trái quyền và đối chiếu bản ghi đơn trong database tạm.",
+      "item": [
+        {
+          "name": "API-16 | 01 | Đăng nhập user",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{user_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/?login_success=1\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-16 | 02 | Khách A hủy đơn của B",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/order/cancel",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"orderId\":\"{{pending_order_id}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 403\",()=>pm.expect(pm.response.code).to.be.oneOf([403]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-17 Chủ đơn được hủy đúng trạng thái và không được hủy lặp",
+      "description": "Dữ liệu: Khách B đăng nhập; đơn Chờ duyệt, đơn Đã giao và một lần gửi hủy lặp.\nMong đợi: Hủy Chờ duyệt thành công; gửi lại bị từ chối 400; đơn Đã giao bị từ chối 400 và giữ nguyên trạng thái.\nPhạm vi: Kiểm tra hủy của chủ đơn với một trạng thái hợp lệ, một trạng thái kết thúc và thao tác lặp tuần tự; chưa kiểm tra cạnh tranh.",
+      "item": [
+        {
+          "name": "API-17 | 01 | Đăng nhập other",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{other_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/?login_success=1\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-17 | 02 | Khách B hủy đơn Chờ duyệt của mình",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/order/cancel",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"orderId\":\"{{pending_order_id}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 200\",()=>pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-17 | 03 | Khách B gửi hủy lặp",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/order/cancel",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"orderId\":\"{{pending_order_id}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 400\",()=>pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-17 | 04 | Khách B thử hủy đơn Đã giao",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/order/cancel",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"orderId\":\"{{delivered_order_id}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 400\",()=>pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-18 Bảo vệ thông tin xác nhận đơn trước phiên ngoài chủ đơn",
+      "description": "Dữ liệu: Đơn B có địa chỉ và số điện thoại giả riêng; mở bằng khách chưa đăng nhập rồi bằng khách A.\nMong đợi: Theo tiêu chí bảo vệ dữ liệu đề xuất, ngoài chủ đơn phải bị từ chối 401 hoặc 403, hoặc chuyển về đăng nhập; không trả địa chỉ và điện thoại đơn B.\nPhạm vi: Hai phiên ngoài chủ đơn với cùng mã đơn tồn tại. Đây là kiểm tra quyền sở hữu dữ liệu, không phải chỉ kiểm tra trang mở được.",
+      "item": [
+        {
+          "name": "API-18 | 01 | Phiên chưa đăng nhập đọc xác nhận đơn B",
+          "request": {
+            "method": "GET",
+            "url": "{{user_url}}/order/checkout?orderId={{pending_order_id}}",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: [401,403,302]\",()=>pm.expect(pm.response.code).to.be.oneOf([401,403,302]));",
+                  "pm.test('Nếu chuyển hướng thì phải về đăng nhập', () => { if (pm.response.code === 302) pm.expect(pm.response.headers.get('Location')).to.equal('/auth/login'); });",
+                  "pm.test('Không trả địa chỉ riêng của đơn B', () => { pm.expect(pm.response.text()).not.to.include('PM_PRIVATE_ADDRESS_API18'); });",
+                  "pm.test('Không trả điện thoại riêng của đơn B', () => { pm.expect(pm.response.text()).not.to.include('0900090018'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-18 | 02 | Đăng nhập user",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{user_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/?login_success=1\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-18 | 03 | Khách A đọc cùng xác nhận đơn B",
+          "request": {
+            "method": "GET",
+            "url": "{{user_url}}/order/checkout?orderId={{pending_order_id}}",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: [401,403,302]\",()=>pm.expect(pm.response.code).to.be.oneOf([401,403,302]));",
+                  "pm.test('Nếu chuyển hướng thì phải về đăng nhập', () => { if (pm.response.code === 302) pm.expect(pm.response.headers.get('Location')).to.equal('/auth/login'); });",
+                  "pm.test('Không trả địa chỉ riêng của đơn B', () => { pm.expect(pm.response.text()).not.to.include('PM_PRIVATE_ADDRESS_API18'); });",
+                  "pm.test('Không trả điện thoại riêng của đơn B', () => { pm.expect(pm.response.text()).not.to.include('0900090018'); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-19 Quản trị tạo sản phẩm có hai size hợp lệ",
+      "description": "Dữ liệu: Tên mới Áo Postman API19, màu Đen; M giá 120.000 đồng tồn 5, L giá 150.000 đồng tồn 3.\nMong đợi: Quản trị viên tạo đúng một sản phẩm và lưu đầy đủ tên, màu, mô tả, hai size, giá và tồn.\nPhạm vi: Tạo sản phẩm bằng JSON trên API quản trị; đọc lại database tạm. Ca này không bao gồm sửa, xóa hoặc tải ảnh sản phẩm.",
+      "item": [
+        {
+          "name": "API-19 | 01 | Đăng nhập admin",
+          "request": {
+            "method": "POST",
+            "url": "{{admin_url}}/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{admin_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/dashboard\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-19 | 02 | Tạo sản phẩm hai size bằng tài khoản quản trị",
+          "request": {
+            "method": "POST",
+            "url": "{{admin_url}}/products/store",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Áo Postman API19\",\"type\":\"Đen\",\"description\":\"Sản phẩm riêng cho kiểm thử Postman API19.\",\"price\":{\"M\":120000,\"L\":150000},\"stock\":{\"M\":5,\"L\":3}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/products\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-20 Quản trị phải từ chối giá âm và tồn kho âm",
+      "description": "Dữ liệu: Hai yêu cầu độc lập: Áo Postman API20 Giá âm có giá M -1, tồn 5; Áo Postman API20 Kho âm có giá M 120.000, tồn -1.\nMong đợi: Theo tiêu chí dữ liệu sản phẩm không âm, cả hai yêu cầu phải bị từ chối và không thêm sản phẩm sai vào database.\nPhạm vi: Hai lượt JSON gửi trực tiếp phía máy chủ; không thử toàn bộ miền giá, kho hoặc kiểu dữ liệu khác.",
+      "item": [
+        {
+          "name": "API-20 | 01 | Đăng nhập admin",
+          "request": {
+            "method": "POST",
+            "url": "{{admin_url}}/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{admin_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/dashboard\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-20 | 02 | Thử tạo sản phẩm có giá âm",
+          "request": {
+            "method": "POST",
+            "url": "{{admin_url}}/products/store",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Áo Postman API20 Giá âm\",\"type\":\"Đen\",\"description\":\"Dữ liệu sai riêng cho kiểm thử.\",\"price\":{\"M\":-1},\"stock\":{\"M\":5}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: [302,400,422]\",()=>pm.expect(pm.response.code).to.be.oneOf([302,400,422]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-20 | 03 | Thử tạo sản phẩm có tồn kho âm",
+          "request": {
+            "method": "POST",
+            "url": "{{admin_url}}/products/store",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Áo Postman API20 Kho âm\",\"type\":\"Đen\",\"description\":\"Dữ liệu sai riêng cho kiểm thử.\",\"price\":{\"M\":120000},\"stock\":{\"M\":-1}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: [302,400,422]\",()=>pm.expect(pm.response.code).to.be.oneOf([302,400,422]));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-21 Duyệt đúng đơn chờ và giữ nguyên đơn không hợp lệ",
+      "description": "Dữ liệu: Có một đơn Chờ duyệt, một đơn Đã giao và một đơn Chờ giao độc lập. Duyệt đơn chờ hai lần rồi thử duyệt đơn đã giao.\nMong đợi: Lần đầu chỉ đổi đơn Chờ duyệt thành Chờ giao. Lần lặp không thay nội dung; đơn đã giao và đơn khác giữ nguyên.\nPhạm vi: Ba yêu cầu duyệt tuần tự bằng tài khoản quản trị; đối chiếu trạng thái, nội dung và số đơn. Không thử hai người duyệt đồng thời.",
+      "item": [
+        {
+          "name": "API-21 | 01 | Đăng nhập admin",
+          "request": {
+            "method": "POST",
+            "url": "{{admin_url}}/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{admin_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/dashboard\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-21 | 02 | Duyệt đơn đang chờ duyệt",
+          "request": {
+            "method": "POST",
+            "url": "{{admin_url}}/orders/approved",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"id\":\"{{pending_order_id}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/orders\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-21 | 03 | Duyệt lặp lại cùng đơn",
+          "request": {
+            "method": "POST",
+            "url": "{{admin_url}}/orders/approved",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"id\":\"{{pending_order_id}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/orders\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-21 | 04 | Thử duyệt đơn đã giao",
+          "request": {
+            "method": "POST",
+            "url": "{{admin_url}}/orders/approved",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"id\":\"{{delivered_order_id}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/orders\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-22 Khách thường không có quyền shipper hoặc quản trị",
+      "description": "Dữ liệu: Tài khoản khách A dùng mật khẩu đúng trên ứng dụng khách và cổng quản trị; thử đọc và duyệt đơn.\nMong đợi: API shipper trả 403. Dù cổng quản trị có nhận đăng nhập, trang sản phẩm và thao tác duyệt phải chuyển về đăng nhập; đơn giữ Chờ duyệt.\nPhạm vi: Đối chiếu quyền thực tế sau đăng nhập ở cả hai ứng dụng; không coi chuyển hướng sau đăng nhập là đã có quyền quản trị.",
+      "item": [
+        {
+          "name": "API-22 | 01 | Đăng nhập user",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{user_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/?login_success=1\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-22 | 02 | Khách A gọi chức năng nhận đơn shipper",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/shipper/accept",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"orderId\":\"{{waiting_order_id}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 403\",()=>pm.expect(pm.response.code).to.be.oneOf([403]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-22 | 03 | Khách A đăng nhập cổng quản trị",
+          "request": {
+            "method": "POST",
+            "url": "{{admin_url}}/login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{user_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/dashboard\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-22 | 04 | Khách A đọc danh sách sản phẩm quản trị",
+          "request": {
+            "method": "GET",
+            "url": "{{admin_url}}/products",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/login\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-22 | 05 | Khách A gửi duyệt đơn qua cổng quản trị",
+          "request": {
+            "method": "POST",
+            "url": "{{admin_url}}/orders/approved",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "id",
+                  "value": "{{pending_order_id}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/login\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-23 Shipper nhận và giao đơn, ghi tiền công một lần",
+      "description": "Dữ liệu: Shipper thử, đơn Chờ giao trị giá 300.000 đồng; tiền công ban đầu 0.\nMong đợi: Nhận và giao đều thành công; đơn Đã giao có ngày giao và đúng shipper. Tiền công 12.000 đồng; gửi giao lặp trả 400 và không cộng thêm.\nPhạm vi: Luồng nhận, đọc lịch sử, giao, gửi lặp tuần tự và đọc biểu đồ; đối chiếu trạng thái, thu nhập, lịch sử trong database.",
+      "item": [
+        {
+          "name": "API-23 | 01 | Đăng nhập shipper",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/shipper-login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{shipper_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/shipper/dashboard\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-23 | 02 | Shipper nhận đơn Chờ giao",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/shipper/accept",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"orderId\":\"{{waiting_order_id}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 200\",()=>pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-23 | 03 | Lịch sử sau nhận có tiền công bằng 0",
+          "request": {
+            "method": "GET",
+            "url": "{{user_url}}/shipper/history/filter?status=shipping",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 200\",()=>pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(true));",
+                  "pm.test('Nhận đơn chưa cộng tiền công', () => { const history = pm.response.json().history; pm.expect(history).to.have.lengthOf(1); pm.expect(history[0].earning).to.equal(0); pm.expect(history[0].status).to.equal('shipping'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-23 | 04 | Shipper giao thành công",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/shipper/deliver",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"orderId\":\"{{waiting_order_id}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 200\",()=>pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-23 | 05 | Shipper gửi xác nhận giao lặp",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/shipper/deliver",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"orderId\":\"{{waiting_order_id}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 400\",()=>pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-23 | 06 | Lịch sử chỉ có một lượt giao thành công",
+          "request": {
+            "method": "GET",
+            "url": "{{user_url}}/shipper/history/filter?status=delivered",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 200\",()=>pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(true));",
+                  "pm.test('Một lịch sử giao với tiền công 12.000 đồng', () => { const history = pm.response.json().history; pm.expect(history).to.have.lengthOf(1); pm.expect(history[0].earning).to.equal(12000); pm.expect(history[0].status).to.equal('delivered'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-23 | 07 | Biểu đồ tiền công sau giao",
+          "request": {
+            "method": "GET",
+            "url": "{{user_url}}/shipper/earnings/chart",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 200\",()=>pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(true));",
+                  "pm.test('Tổng tiền công biểu đồ là 12.000 đồng', () => { const values = Object.values(pm.response.json().chartData); pm.expect(values.reduce((a,b) => a+b, 0)).to.equal(12000); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API-24 Shipper không được giao hoặc hủy đơn gán cho người khác",
+      "description": "Dữ liệu: Đơn đang giao được gán một định danh khác shipper đang đăng nhập; tổng tiền 300.000 đồng.\nMong đợi: Cả giao và hủy đều bị từ chối 400; người được gán, trạng thái, lịch sử và thu nhập giữ nguyên.\nPhạm vi: Hai yêu cầu trái người được giao trên cùng đơn ở trạng thái Đang giao; chưa kiểm tra nhận đơn cạnh tranh.",
+      "item": [
+        {
+          "name": "API-24 | 01 | Đăng nhập shipper",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/auth/shipper-login",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "account",
+                  "value": "{{shipper_account}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 302\",()=>pm.expect(pm.response.code).to.be.oneOf([302]));",
+                  "pm.test('Địa chỉ chuyển hướng đúng',()=>pm.expect(pm.response.headers.get('Location')).to.eql(\"/shipper/dashboard\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-24 | 02 | Shipper thử giao đơn được gán cho người khác",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/shipper/deliver",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"orderId\":\"{{waiting_order_id}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 400\",()=>pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API-24 | 03 | Shipper thử hủy đơn được gán cho người khác",
+          "request": {
+            "method": "POST",
+            "url": "{{user_url}}/shipper/cancel",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"orderId\":\"{{waiting_order_id}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Mã HTTP đúng: 400\",()=>pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Phản hồi có định dạng JSON',()=>pm.expect(pm.response.headers.get('Content-Type')||'').to.include('application/json'));",
+                  "pm.test(\"Giá trị success đúng\",()=>pm.expect(pm.response.json()[\"success\"]).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

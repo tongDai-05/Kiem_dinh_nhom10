@@ -1,0 +1,95 @@
+﻿ma_ca,trang_thai_cu,phan_con_thieu,cach_chay,dieu_kien_tien_quyet,can_chay_lai
+BB-01,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-02,Thực hiện một phần,"Biên 3/4, 6/7, email sai, xác nhận lệch, họ tên rỗng/dấu cách",Selenium Chrome/Firefox + DB tạm,"DB tạm, cổng ngẫu nhiên, dữ liệu fixture",Có
+BB-03,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-04,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-05,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-06,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-07,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-08,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-09,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-10,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-11,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-12,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-13,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-14,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-15,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-16,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-17,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-18,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-19,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-20,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-21,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-22,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-23,Thực hiện một phần,Đơn shipping/cancelled và hủy lặp,Selenium Chrome/Firefox + API trong phiên + DB tạm,"DB tạm, cổng ngẫu nhiên, dữ liệu fixture",Có
+BB-24,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-25,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-26,Thực hiện một phần,"Trùng, giá/tồn âm, lẻ, 0 và sai kiểu",Selenium Chrome/Firefox + DB tạm,"DB tạm, cổng ngẫu nhiên, dữ liệu fixture",Có
+BB-27,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-28,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-29,Thực hiện một phần,"Tạo Shipper, trùng tài khoản, xác nhận mật khẩu sai",Selenium Chrome/Firefox + DB tạm,"DB tạm, cổng ngẫu nhiên, dữ liệu fixture",Có
+BB-30,Thực hiện một phần,Duyệt lặp và ma trận hủy,Selenium Chrome/Firefox + API Admin + DB tạm,"DB tạm, cổng ngẫu nhiên, dữ liệu fixture",Có
+BB-31,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-32,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-33,Thực hiện một phần,shipping/cancelled và biến thể phiên,Selenium Chrome/Firefox + API trong phiên + DB tạm,"DB tạm, cổng ngẫu nhiên, dữ liệu fixture",Có
+BB-34,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+BB-35,Thực hiện một phần,Hai yêu cầu giao đồng thời,Selenium Chrome/Firefox + hai yêu cầu đồng thời + DB tạm,"DB tạm, cổng ngẫu nhiên, dữ liệu fixture",Có
+BB-36,Thực hiện một phần,Người thứ hai hủy sai chủ,Selenium Chrome/Firefox + API trong phiên + DB tạm,"DB tạm, cổng ngẫu nhiên, dữ liệu fixture",Có
+WB-01,Đạt ở mức đơn vị có mô phỏng,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+WB-02,Đạt ở mức đơn vị có mô phỏng,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+WB-03,Đạt ở mức đơn vị có mô phỏng,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+WB-04,Đạt ở mức đơn vị có mô phỏng,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+WB-05,Đạt ở mức đơn vị có mô phỏng,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+WB-06,Đạt ở mức đơn vị có mô phỏng,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+WB-07,Đạt ở mức đơn vị có mô phỏng,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+WB-08,Đạt ở mức đơn vị có mô phỏng,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+WB-09,Đạt ở mức đơn vị có mô phỏng,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+WB-10,Đạt ở mức đơn vị có mô phỏng,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+WB-11,Đạt ở mức đơn vị có mô phỏng,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+WB-12,Đạt ở mức đơn vị có mô phỏng,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+WB-13,Đạt ở mức đơn vị có mô phỏng,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+WB-14,Đạt ở mức đơn vị có mô phỏng,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+WB-15,Đạt ở mức đơn vị có mô phỏng,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+WB-16,Đạt ở mức đơn vị có mô phỏng,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+WB-17,Đạt ở mức đơn vị có mô phỏng,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+WB-18,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+UI-01,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+UI-02,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+UI-03,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+UI-04,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+UI-05,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+UI-06,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+UI-07,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+UI-08,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-01,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-02,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-03,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-04,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-05,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-06,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-07,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-08,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-09,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-10,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-11,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-12,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-13,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-14,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-15,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-16,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-17,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-18,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-19,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-20,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-21,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-22,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-23,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+API-24,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+ADV-01,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+ADV-02,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+ADV-03,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+ADV-04,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+ADV-05,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+ADV-06,Không đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không
+ADV-07,Đạt,Chạy lại bắt buộc và bổ sung ảnh,Selenium: 8 ca UI trên Chrome và Firefox,"DB tạm, cổng ngẫu nhiên, dữ liệu fixture",Có
+ADV-08,Đạt,Không - giữ kết quả cũ,Không chạy lại theo quy tắc,Không áp dụng,Không

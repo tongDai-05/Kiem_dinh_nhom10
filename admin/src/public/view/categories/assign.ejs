@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- head -->
+<%- include('../partials/head') %>
+
+    <body>
+        <div class="wrapper">
+            <!-- Sidebar -->
+            <%- include('../partials/sidebar') %>
+                <div class="main-panel">
+                    <div class="main-header">
+                        <div class="main-header-logo">
+                            <!-- Logo Header -->
+                            <div class="logo-header" data-background-color="dark">
+                                <div class="nav-toggle">
+                                    <button class="btn btn-toggle toggle-sidebar">
+                                        <i class="gg-menu-right"></i>
+                                    </button>
+                                    <button class="btn btn-toggle sidenav-toggler">
+                                        <i class="gg-menu-left"></i>
+                                    </button>
+                                </div>
+                                <button class="topbar-toggler more">
+                                    <i class="gg-more-vertical-alt"></i>
+                                </button>
+                            </div>
+                            <!-- End Logo Header -->
+                        </div>
+                        <!-- Navbar Header -->
+                        <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
+                            <div class="container-fluid">
+                                <nav
+                                    class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <button type="submit" class="btn btn-search pe-1">
+                                                <i class="fa fa-search search-icon"></i>
+                                            </button>
+                                        </div>
+                                        <input type="text" placeholder="Tìm kiếm..." class="form-control" />
+                                    </div>
+                                </nav>
+                            </div>
+                        </nav>
+                        <!-- End Navbar -->
+                    </div>
+
+                    <div class="container">
+                        <div class="page-inner">
+                            <div class="page-header">
+                                <!-- Name Table -->
+                                <%- include('../partials/name-table') %>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <div class="d-flex align-items-center">
+                                                <h4>Gán sản phẩm vào danh mục</h4>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <!-- Data Table -->
+                                            <div class="table-responsive">
+                                                <table id="add-row" class="display table table-striped table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Hình ảnh</th>
+                                                            <th>Tên sản phẩm</th>
+                                                            <th>Mô tả</th>
+                                                            <th>Giá bán</th>
+                                                            <th>Chọn danh mục</th>
+                                                            <th style="width: 10%">Thao tác</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <th>Hình ảnh</th>
+                                                            <th>Tên sản phẩm</th>
+                                                            <th>Mô tả</th>
+                                                            <th>Giá bán</th>
+                                                            <th>Chọn danh mục</th>
+                                                            <th>Thao tác</th>
+                                                        </tr>
+                                                    </tfoot>
+                                                    <tbody>
+                                                        <% products.forEach(product=>{ %>
+                                                            <tr>
+                                                                <td><img style="width: 100px;height: 75px;object-fit: contain;"
+                                                                        class="image"
+                                                                        src="/products/image/<%=product._id%>"
+                                                                        alt="<%=product.image?.imageName%>">
+                                                                </td>
+                                                                <td>
+                                                                    <%=product.name %>
+                                                                </td>
+                                                                <td>
+                                                                    <%=product.description %>
+                                                                </td>
+                                                                <td>
+                                                                    <%=product.detail.price ? product.detail.price.toLocaleString('vi-VN') : 0 %> <u>đ</u>
+                                                                </td>
+                                                                <form action="/categories/assign" method="post">
+                                                                    <input type="hidden" name="productName"
+                                                                        value="<%=product.name %>">
+                                                                    <td style="text-align: center;">
+                                                                        <% if(categories.length){ %>
+                                                                            <select class="form-select form-select-sm"
+                                                                                name="categoryID" style="width: 100%;">
+                                                                                <option style="width: 80%;" disabled
+                                                                                    selected>
+                                                                                    Chọn danh mục...
+                                                                                </option>
+                                                                                <% categories.forEach(category=>{ %>
+                                                                                    <option style="width: 80%;"
+                                                                                        value="<%=category.id%>">
+                                                                                        <%=category.name%>
+                                                                                    </option>
+                                                                                    <% }) %>
+
+                                                                            </select>
+                                                                            <% }else{ %>
+                                                                                Chưa có danh mục nào
+                                                                                <% } %>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="form-button-action">
+                                                                            <button type="submit"
+                                                                                data-bs-toggle="tooltip" title="Gán vào danh mục"
+                                                                                class="btn btn-success">
+                                                                                <i class="fa fa-paper-plane"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </td>
+                                                                </form>
+                                                            </tr>
+                                                            <% }) %>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Footer -->
+                    <%- include('../partials/footer') %>
+                </div>
+        </div>
+        <!-- Table Script -->
+        <%- include('../partials/table-script') %>
+            <!-- My Script -->
+            <%- include('../partials/my-script') %>
+    </body>
+
+</html>

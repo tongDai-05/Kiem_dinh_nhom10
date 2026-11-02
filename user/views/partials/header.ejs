@@ -1,0 +1,343 @@
+<!doctype html>
+<html class="no-js" lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title><%= typeof title !== 'undefined' ? title + ' | Tên Shop Của Bạn' : 'Tên Shop Của Bạn' %></title>
+    <meta name="description" content="Mô tả shop của bạn">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="/css/flaticon.css">
+    <link rel="stylesheet" href="/css/slicknav.css">
+    <link rel="stylesheet" href="/css/animate.min.css">
+    <link rel="stylesheet" href="/css/magnific-popup.css">
+    <link rel="stylesheet" href="/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/css/themify-icons.css">
+    <link rel="stylesheet" href="/css/slick.css">
+    <link rel="stylesheet" href="/css/nice-select.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/product-list.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+    .btn.header-btn {
+        background: linear-gradient(135deg, #ff4c4c, #ff7b5c); /* Gradient đỏ cam hiện đại */
+        color: #fff;
+        padding: 10px 24px;
+        font-size: 15px;
+        font-weight: 600;
+        border-radius: 50px;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(255, 76, 76, 0.3);
+    }
+
+    .btn.header-btn:hover {
+        background: linear-gradient(135deg, #e53e3e, #ff5f3c);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(229, 62, 62, 0.4);
+        color: #fff;
+    }
+
+    .btn.header-btn i {
+        font-size: 16px;
+    }
+    /* Gom 3 nút header phải sát nhau, đồng bộ layout */
+    .header-bottom .header-right {
+        gap: 20px !important;
+    }
+    .header-bottom .header-right li {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    .header-icon-btn,
+    .header-user-dropdown {
+        margin-right: 0 !important;
+    }
+    .header-right li:last-child .header-icon-btn,
+    .header-right li:last-child .header-user-dropdown {
+        margin-right: 0;
+    }
+    .header-icon-btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        border: 1px solid #eeeeee;
+        background: #fff;
+        transition: border 0.2s, color 0.2s;
+        margin-right: 0;
+    }
+    .header-icon-btn i {
+        font-size: 20px;
+        color: #4e4e4e;
+        transition: color 0.2s;
+        line-height: 1;
+    }
+    .header-icon-btn:hover {
+        border: 1.5px solid #00b1ff;
+    }
+    .header-icon-btn:hover i {
+        color: #00b1ff;
+    }
+    .header-icon-btn[data-badge]:before {
+        content: attr(data-badge);
+        position: absolute;
+        top: 0px;
+        right: -8px;
+        width: 25px;
+        height: 25px;
+        background: #00b1ff;
+        color: #fff;
+        line-height: 25px;
+        text-align: center;
+        border-radius: 30px;
+        font-size: 12px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        z-index: 2;
+        display: inline-block;
+    }
+    .header-icon-btn[data-badge="0"]:before {
+        display: none;
+    }
+    .header-user-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+    .header-user-btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 1px solid #e3e6ee;
+        background: #fff;
+        transition: border 0.2s, background 0.2s;
+        cursor: pointer;
+        box-shadow: 0 1.5px 6px #0d6efd0a;
+    }
+    .header-user-btn i {
+        font-size: 18px;
+        color: #4e4e4e;
+        transition: color 0.2s;
+    }
+    .header-user-btn:hover {
+        border: 1.5px solid #0d6efd;
+        background: #f5faff;
+    }
+    .header-user-btn:hover i {
+        color: #0d6efd;
+    }
+    .user-dropdown-menu {
+        display: none;
+        position: absolute;
+        top: 48px;
+        right: 0;
+        min-width: 180px;
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 6px 24px #0d6efd18, 0 1.5px 8px #0d6efd0a;
+        padding: 14px 16px 10px 16px;
+        z-index: 100;
+        font-family: 'Inter', 'Roboto', Arial, sans-serif;
+        animation: fadeInDown .22s;
+        border: 1px solid #e3e6ee;
+    }
+    .header-user-dropdown:hover .user-dropdown-menu,
+    .header-user-dropdown:focus-within .user-dropdown-menu {
+        display: block;
+    }
+    .user-dropdown-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #f5faff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 6px auto;
+        font-size: 1.15rem;
+        color: #0d6efd;
+        box-shadow: 0 1px 4px #0d6efd0a;
+    }
+    .user-dropdown-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #222;
+        margin-bottom: 6px;
+        text-align: center;
+        letter-spacing: 0.2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .user-dropdown-divider {
+        height: 1px;
+        background: #e3e6ee;
+        border: none;
+        margin: 8px 0 10px 0;
+    }
+    .user-dropdown-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+    .user-dropdown-actions a, .user-dropdown-actions button {
+        border: none;
+        outline: none;
+        background: #f5faff;
+        color: #0d6efd;
+        font-weight: 600;
+        font-size: 0.97rem;
+        border-radius: 8px;
+        padding: 7px 0 7px 0;
+        text-align: center;
+        text-decoration: none;
+        transition: background 0.15s, color 0.15s;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+    .user-dropdown-actions a:hover, .user-dropdown-actions button:hover {
+        background: #e7f1ff;
+        color: #0d6efd;
+    }
+    .user-dropdown-actions i {
+        font-size: 1em;
+        margin-right: 2px;
+    }
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .header-search-group { position: relative; }
+    #header-search-suggest-box { z-index: 9999; }
+    </style>
+</head>
+<body>
+<!-- Preloader Start -->
+<div id="preloader-active">
+    <div class="preloader d-flex align-items-center justify-content-center">
+        <div class="preloader-inner position-relative">
+            <div class="preloader-circle"></div>
+            <div class="preloader-img pere-text">
+                <img src="/img/logo/logo.png" alt="Logo Shop">
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Preloader End -->
+<header>
+    <!-- Header Start -->
+    <div class="header-area">
+        <div class="main-header ">
+            <!-- ĐÃ XÓA header-top/top-bg panel đen phía trên -->
+            <div class="header-bottom header-sticky">
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <div class="col-xl-1 col-lg-1 col-md-1 col-sm-3">
+                            <div class="logo">
+                                <a href="/"><img src="/img/logo/logo.png" alt="Logo Shop"></a>
+                            </div>
+                        </div>
+                        <div class="col-xl-6 col-lg-8 col-md-7 col-sm-5">
+                            <div class="main-menu f-right d-none d-lg-block">
+                                <nav>
+                                    <ul id="navigation">
+                                        <li><a href="/">Trang Chủ</a></li>
+                                        <li><a href="/products">Sản Phẩm</a></li>
+                                        <li><a href="#">Danh Mục</a>
+                                            <ul class="submenu">
+                                                <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                                                    <% categories.forEach(category => { %>
+                                                        <li><a href="/products/category/<%= category._id %>"><%= category.name %></a></li>
+                                                    <% }); %>
+                                                <% } %>
+                                            </ul>
+                                        </li>
+                                        <li><a href="/about">Về Chúng Tôi</a></li>
+                                        <li><a href="/contact">Liên Hệ</a></li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                        <div class="col-xl-5 col-lg-3 col-md-3 col-sm-3 fix-card">
+                            <ul class="header-right f-right d-none d-lg-block d-flex justify-content-between">
+                                <li class="d-none d-xl-block">
+                                    <div class="form-box f-right ">
+                                        <form action="/products" method="GET" class="header-search-group" style="display:inline-block;width:100%;max-width:320px;">
+                                            <input type="text" name="keyword" placeholder="Tìm kiếm sản phẩm" autocomplete="off" style="width:100%;border-radius:30px;padding:8px 44px 8px 18px;font-size:1.1rem;">
+                                            <div class="search-icon">
+                                                <button type="submit" style="background: none; border: none;position:absolute;right:18px;top:50%;transform:translateY(-50%);"><i class="fas fa-search special-tag"></i></button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </li>
+                                <% if (currentUser) { %>
+                                    <li class="d-none d-xl-block">
+                                        <a href="/wishlist" class="header-icon-btn" data-badge="<%= typeof wishlistCount !== 'undefined' ? wishlistCount : 0 %>" title="Yêu thích">
+                                            <i class="far fa-heart"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="/cart" class="header-icon-btn" data-badge="<%= typeof cartCount !== 'undefined' ? cartCount : 0 %>" title="Giỏ hàng">
+                                            <i class="fas fa-shopping-cart"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="/order/history" class="header-icon-btn" title="Lịch sử mua hàng">
+                                            <i class="fas fa-history"></i>
+                                        </a>
+                                    </li>
+                                    <li class="header-user-dropdown">
+                                        <div class="header-user-btn" tabindex="0">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div class="user-dropdown-menu">
+                                            <div class="user-dropdown-avatar">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div class="user-dropdown-name">
+                                                <%= currentUser ? (currentUser.name || currentUser.fullName || 'Người dùng') : 'Khách' %>
+                                            </div>
+                                            <hr class="user-dropdown-divider" />
+                                            <div class="user-dropdown-actions">
+                                                <a href="/auth/profile"><i class="fas fa-id-card"></i>Thông tin cá nhân</a>
+                                                <form action="/auth/logout" method="POST" style="margin:0;padding:0;">
+                                                    <button type="submit"><i class="fas fa-sign-out-alt"></i>Đăng xuất</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </li>
+                                <% } else { %>
+                                    <li class="d-none d-lg-block"> <a href="/auth/login" class="btn header-btn">Đăng nhập</a></li>
+                                <% } %>
+                            </ul>
+                        </div>
+                        <div class="col-12">
+                            <div class="mobile_menu d-block d-lg-none"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Header End -->
+</header>
+<main>
+    <%- include('./messages') %>

@@ -1,0 +1,1051 @@
+<%- include('../partials/header', { title: title }) %>
+
+<!-- Thêm Font Awesome 4.7.0 CDN để đảm bảo icon ngôi sao hiển thị đúng -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+    .product-detail-modern {
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 4px 32px rgba(37,109,255,0.08), 0 1.5px 8px rgba(0,0,0,0.06);
+        padding: 36px 32px 32px 32px;
+        margin-bottom: 32px;
+    }
+    .product-img-gallery {
+        background: linear-gradient(135deg,#f7faff 60%,#eaf1ff 100%);
+        border-radius: 18px;
+        box-shadow: 0 2px 16px rgba(37,109,255,0.07);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 340px;
+        margin-bottom: 18px;
+        transition: box-shadow 0.2s;
+    }
+    .product-img-gallery img {
+        max-width: 90%;
+        max-height: 320px;
+        border-radius: 14px;
+        box-shadow: 0 2px 8px rgba(37,109,255,0.10);
+        transition: transform 0.3s;
+    }
+    .product-img-gallery:hover img {
+        transform: scale(1.06) rotate(-1.5deg);
+    }
+    .single-product-details h3 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: #222;
+    }
+    .badge-success {
+        background: linear-gradient(90deg,#256DFF 0%,#00c48c 100%);
+        color: #fff;
+        font-size: 1rem;
+        border-radius: 16px;
+        padding: 6px 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: inline-block;
+        box-shadow: 0 2px 8px rgba(37,109,255,0.10);
+        letter-spacing: 0.5px;
+        line-height: 1.2;
+    }
+    .badge-outofstock {
+        background: linear-gradient(90deg,#ff003c 0%,#ff6a00 100%);
+        color: #fff;
+        font-size: 1rem;
+        border-radius: 16px;
+        padding: 6px 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: inline-block;
+        box-shadow: 0 2px 8px rgba(37,109,255,0.10);
+        letter-spacing: 0.5px;
+        line-height: 1.2;
+    }
+    .single-product-details p {
+        color: #444;
+        font-size: 1.08rem;
+        margin-bottom: 18px;
+    }
+    .single-product-details label {
+        font-weight: 500;
+        color: #555;
+    }
+    .single-product-details .form-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 14px;
+    }
+    .single-product-details .form-group label {
+        min-width: 120px;
+        margin-bottom: 0;
+        margin-right: 12px;
+        flex-shrink: 0;
+        text-align: right;
+    }
+    .single-product-details .form-group select.form-control {
+        flex: 1 1 0%;
+        margin-bottom: 0;
+        min-width: 0;
+    }
+    .product-price-modern {
+        font-size: 2rem;
+        color: #ff003c;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+    .product-stock-modern {
+        font-size: 1.1rem;
+        color: #256DFF;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+    .qty-group-modern {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        border: 1.5px solid #eaeaea;
+        border-radius: 12px;
+        background: #fafbfc;
+        width: 120px;
+        height: 44px;
+        margin-bottom: 18px;
+    }
+    .qty-btn-modern {
+        width: 44px;
+        height: 44px;
+        border: none;
+        background: #f4f6fa;
+        color: #256DFF;
+        font-size: 1.3rem;
+        font-weight: 700;
+        border-radius: 12px 0 0 12px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .qty-btn-modern:last-child {
+        border-radius: 0 12px 12px 0;
+    }
+    .qty-btn-modern:hover {
+        background: #256DFF;
+        color: #fff;
+    }
+    .qty-input-modern {
+        width: 32px;
+        border: none;
+        text-align: center;
+        font-size: 1.1rem;
+        background: transparent;
+        outline: none;
+    }
+    .cta-btn-modern {
+        padding: 12px 32px;
+        font-size: 1.15rem;
+        font-weight: 700;
+        border-radius: 24px;
+        margin-right: 16px;
+        background: linear-gradient(90deg,#256DFF 0%,#ff003c 100%);
+        color: #fff;
+        border: none;
+        box-shadow: 0 2px 8px rgba(37,109,255,0.13);
+        transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+    }
+    .cta-btn-modern:last-child {
+        margin-right: 0;
+        background: #fff;
+        color: #256DFF;
+        border: 2px solid #256DFF;
+    }
+    .cta-btn-modern:hover {
+        background: #ff003c;
+        color: #fff;
+        transform: translateY(-2px) scale(1.04);
+        box-shadow: 0 4px 16px rgba(255,0,60,0.10);
+    }
+    @media (max-width: 900px) {
+        .product-detail-modern { padding: 18px 6px; }
+        .product-img-gallery { min-height: 180px; }
+        .single-product-details h3 { font-size: 1.3rem; }
+        .product-price-modern { font-size: 1.2rem; }
+    }
+    @media (max-width: 600px) {
+        .single-product-details .form-group {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .single-product-details .form-group label {
+            text-align: left;
+            margin-bottom: 6px;
+            min-width: 0;
+        }
+    }
+
+    /* Tab hiện đại, bỏ gradient, dùng border xanh nhạt */
+    .nav-tabs {
+      border-bottom: 2px solid #e3e9f7;
+      display: flex;
+      justify-content: center;
+      background: #f7faff;
+      border-radius: 16px 16px 0 0;
+      overflow: hidden;
+    }
+    .nav-tabs .nav-link {
+      font-size: 1.13rem;
+      font-weight: 700;
+      color: #256DFF;
+      background: #f7faff;
+      border: none;
+      border-radius: 0;
+      padding: 13px 32px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .nav-tabs .nav-link.active {
+      background: #fff;
+      color: #ff003c;
+      border-bottom: 3px solid #ff003c;
+      border-radius: 16px 16px 0 0;
+      box-shadow: 0 2px 8px #e3e9f7;
+    }
+
+    /* Đánh giá hiện đại */
+    .review-modern-box {
+      background: #fff;
+      border-radius: 14px;
+      border: 1.5px solid #e3e9f7;
+      box-shadow: 0 2px 8px rgba(37,109,255,0.04);
+      padding: 16px 20px 10px 20px;
+      margin-bottom: 16px;
+    }
+    .review-modern-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+    .review-modern-username {
+      font-weight: 700;
+      color: #256DFF;
+      font-size: 1.07rem;
+    }
+    .review-modern-stars {
+      color: #ffb400;
+      font-size: 1.12rem;
+      letter-spacing: 1px;
+    }
+    .review-modern-time {
+      color: #888;
+      font-size: 0.97rem;
+    }
+    .review-modern-comment {
+      color: #222;
+      font-size: 1.07rem;
+      margin-top: 2px;
+      word-break: break-word;
+    }
+    .review-modern-empty {
+      color: #aaa;
+      font-style: italic;
+      text-align: center;
+      margin: 16px 0;
+    }
+
+    #reviewForm .form-control, #reviewForm textarea {
+      border-radius: 12px;
+      border: 1.5px solid #e3e9f7;
+      font-size: 1.07rem;
+      background: #f7faff;
+      transition: border 0.2s;
+    }
+    #reviewForm .form-control:focus, #reviewForm textarea:focus {
+      border-color: #256DFF;
+      background: #fff;
+    }
+    #reviewForm label {
+      font-weight: 600;
+      color: #256DFF;
+      margin-bottom: 6px;
+      display: block;
+    }
+    #reviewForm .btn-primary {
+      background: #256DFF;
+      border: none;
+      border-radius: 24px;
+      font-weight: 700;
+      font-size: 1.18rem;
+      padding: 16px 48px;
+      margin-top: 12px;
+      box-shadow: 0 2px 8px #e3e9f7;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+      letter-spacing: 0.5px;
+    }
+    #reviewForm .btn-primary:hover {
+      background: #1746a2;
+      color: #fff;
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 4px 16px #dbeafe;
+    }
+    #reviewForm .form-group {
+      margin-bottom: 18px;
+    }
+    #reviewForm select.form-control {
+      min-width: 200px;
+      display: inline-block;
+      background: #f7faff;
+      border: 1.5px solid #e3e9f7;
+      border-radius: 12px;
+      font-size: 1.07rem;
+      color: #222;
+      box-shadow: none;
+      margin-right: 10px;
+    }
+    #reviewForm select.form-control:focus {
+      border-color: #256DFF;
+      background: #fff;
+      color: #222;
+    }
+    #reviewForm .form-control:focus, #reviewForm textarea:focus {
+      border-color: #256DFF;
+      background: #fff;
+      color: #222;
+    }
+    #reviewForm .form-control option {
+      color: #222;
+    }
+    #reviewForm .form-control option:checked {
+      background: #e3e9f7;
+      color: #256DFF;
+    }
+    /* ...existing code... */
+</style>
+
+<div class="container product-detail-modern mt-4">
+    <div class="row">
+        <div class="col-lg-6 col-md-6">
+            <div class="product-img-gallery mb-4 position-relative">
+                <img id="mainProductImg"
+                    src="<%= product.image %>"
+                    alt="<%= product.name %>"
+                    class="img-fluid" />
+                <!-- Wishlist button -->
+                <button class="wishlist-btn<% if (wishlist && wishlist.includes(product.name)) { %> active<% } %>" 
+                        data-product-name="<%= product.name %>" 
+                        title="<%= (wishlist && wishlist.includes(product.name)) ? 'Bỏ khỏi yêu thích' : 'Thêm vào yêu thích' %>"
+                        style="position:absolute;top:18px;right:18px;">
+                    <i class="fas fa-heart"></i>
+                </button>
+            </div>
+            <!-- Banner cam kết dưới ảnh sản phẩm - giao diện hiện đại, trẻ trung -->
+            <div class="product-guarantee-banner-modern" style="background:linear-gradient(135deg,#f7faff 60%,#eaf1ff 100%);border-radius:1.5rem;padding:28px 22px 18px 22px;box-shadow:0 4px 24px #256dff13;margin-bottom:18px;display:flex;flex-direction:column;gap:18px;align-items:flex-start;">
+                <div style="display:flex;align-items:center;gap:16px;">
+                    <div style="background:#256DFF22;border-radius:50%;width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
+                        <i class="fas fa-shield-alt" style="color:#256DFF;font-size:1.7rem;"></i>
+                    </div>
+                    <div style="font-size:1.18rem;font-weight:700;color:#222;letter-spacing:0.2px;">Cam kết <span style="color:#256DFF">1 đổi 1</span> nếu hàng lỗi</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:16px;">
+                    <div style="background:#00c48c22;border-radius:50%;width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
+                        <i class="fa fa-truck" style="color:#00c48c;font-size:1.7rem;"></i>
+                    </div>
+                    <div style="font-size:1.18rem;font-weight:700;color:#222;letter-spacing:0.2px;">Giao nhanh <span style="color:#00c48c">5 ngày</span>, <span style="color:#00c48c">miễn phí ship</span> toàn quốc</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:16px;">
+                    <div style="background:#ff003c22;border-radius:50%;width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
+                        <i class="fas fa-sync-alt" style="color:#ff003c;font-size:1.7rem;"></i>
+                    </div>
+                    <div style="font-size:1.18rem;font-weight:700;color:#222;letter-spacing:0.2px;">1 đổi 1 nếu có lỗi do nhà sản xuất <span style="color:#ff003c">trong 7 ngày</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6">
+            <div class="single-product-details">
+                <h3><%= product.name %></h3>
+                <!-- Hiển thị số sao và số đánh giá -->
+                <div class="product-rating mb-3" style="font-size:1.35rem;">
+                  <% const displayRating = typeof product.displayRating !== 'undefined' ? product.displayRating : 0;
+                     const avgRating = typeof product.rating !== 'undefined' ? product.rating : 0;
+                     const totalReviews = typeof product.ratingCount !== 'undefined' ? product.ratingCount : (product.reviewProducts ? product.reviewProducts.length : 0);
+                     const rounded = Math.round(avgRating * 10) / 10;
+                  %>
+                  <% if (totalReviews > 0) { %>
+                    <% for(let i=1;i<=5;i++) { %>
+                      <% if (i <= displayRating) { %>
+                        <i class="fas fa-star" style="color:#ffb400;"></i>
+                      <% } else { %>
+                        <i class="far fa-star" style="color:#ffb400;"></i>
+                      <% } %>
+                    <% } %>
+                    <span style="font-size:1.08rem;color:#888;margin-left:8px;vertical-align:middle;">(<%= rounded %> / 5, <%= totalReviews %> đánh giá)</span>
+                  <% } else { %>
+                    <span class="text-muted" style="font-size:1.08rem;">Chưa có đánh giá</span>
+                  <% } %>
+                </div>
+                <div class="mb-2">
+                    <span class="badge badge-success">Còn hàng</span>
+                    <span class="badge-outofstock" style="display:none;font-size:1.1rem;padding:8px 22px;border-radius:18px;">Hết hàng</span>
+                </div>
+                <p><%= product.description %></p>
+                <form id="productOptionsForm" autocomplete="off">
+                    <div class="form-group">
+                        <label for="typeSelect">Loại sản phẩm:</label>
+                        <select class="form-control" id="typeSelect" name="type">
+                            <% product.types.forEach((type, idx) => { %>
+                                <option value="<%= idx %>"><%= type.type %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sizeSelect">Size:</label>
+                        <select class="form-control" id="sizeSelect" name="size"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Giá bán:</label>
+                        <span id="productPrice" class="product-price-modern"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>Tồn kho:</label>
+                        <span id="productStock" class="product-stock-modern"></span>
+                    </div>
+                    <div class="form-group d-flex align-items-center">
+                        <label class="mr-2 mb-0">Số lượng:</label>
+                        <div class="qty-group-modern">
+                            <button type="button" class="qty-btn-modern" id="qtyDown">-</button>
+                            <input type="number" class="qty-input-modern" id="qtyInput" name="qty" min="1" value="1">
+                            <button type="button" class="qty-btn-modern" id="qtyUp">+</button>
+                        </div>
+                    </div>
+                    <div class="d-flex">
+                        <button type="button" class="cta-btn-modern" id="addToCartBtn">Thêm vào giỏ hàng</button>
+                        <button type="button" class="cta-btn-modern" id="buyNowBtn">Mua ngay</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-5">
+        <div class="col-12">
+            <ul class="nav nav-tabs" id="productTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="desc-tab" data-toggle="tab" href="#desc" role="tab">Mô tả</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="review-tab" data-toggle="tab" href="#review" role="tab">Đánh giá</a>
+                </li>
+            </ul>
+            <div class="tab-content" id="productTabContent">
+                <div class="tab-pane fade show active p-3" id="desc" role="tabpanel">
+                    <%= product.description %>
+                </div>
+                <div class="tab-pane fade p-3" id="review" role="tabpanel">
+                    <div class="form-group mb-3" style="max-width:320px; margin-bottom: 24px !important;">
+                      <label for="filterReviewType" style="font-weight:600;">Xem đánh giá theo loại sản phẩm:</label>
+                      <select class="form-control" id="filterReviewType" style="margin-bottom: 12px;">
+                        <option value="all">Tất cả loại</option>
+                        <% product.types.forEach((type, idx) => { %>
+                          <option value="<%= type.type %>"><%= type.type %></option>
+                        <% }) %>
+                      </select>
+                    </div>
+                    <div style="clear:both;height:8px;"></div>
+                    <div id="reviewList"></div>
+                    <hr/>
+                    <% if (currentUser) { %>
+                    <form id="reviewForm" class="mb-3">
+                      <div class="form-group">
+                        <label for="reviewType">Chọn loại sản phẩm muốn đánh giá:</label>
+                        <select class="form-control" id="reviewType" name="type" required>
+                          <option value="">-- Chọn loại sản phẩm --</option>
+                          <% product.types.forEach((type, idx) => { %>
+                            <option value="<%= type.type %>"><%= type.type %></option>
+                          <% }) %>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label>Đánh giá:</label>
+                        <div id="starRatingGroup" style="display:flex;justify-content:space-between;max-width:520px;margin:0 auto 8px auto;gap:8px;">
+                          <% const starLabels = ['Rất Tệ', 'Tệ', 'Bình thường', 'Tốt', 'Tuyệt vời']; %>
+                          <% for(let i=1;i<=5;i++){ %>
+                            <div class="star-rating-item" style="display:flex;flex-direction:column;align-items:center;cursor:pointer;">
+                              <i class="fa fa-star-o star-icon" data-star="<%=i%>" style="font-size:2.2rem;transition:color 0.2s;"></i>
+                              <span class="star-label" style="font-size:1.05rem;margin-top:4px;color:#444;"><%= starLabels[i-1] %></span>
+                            </div>
+                          <% } %>
+                        </div>
+                        <input type="hidden" id="reviewStar" name="star" value="0" required />
+                      </div>
+                      <div class="form-group">
+                        <label for="reviewComment">Bình luận:</label>
+                        <textarea class="form-control" id="reviewComment" name="comment" rows="2" maxlength="300" required></textarea>
+                      </div>
+                      <button type="submit" class="btn btn-primary">Gửi Đánh Giá</button>
+                    </form>
+                    <% } else { %>
+                    <div class="alert alert-info text-center">Bạn cần <a href="/auth/login">đăng nhập</a> để đánh giá sản phẩm.</div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Đăng nhập/Đăng ký -->
+<div class="modal fade" id="authModal" tabindex="-1" role="dialog" aria-labelledby="authModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content" style="border-radius: 1rem;">
+      <div class="modal-header" style="border-bottom: none;">
+        <h5 class="modal-title w-100 text-center" id="authModalLabel" style="font-weight: bold;">Bạn cần đăng nhập hoặc đăng ký để tiếp tục</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="outline: none;">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body text-center">
+        <a href="/auth/login" class="btn btn-primary mb-2" style="width: 120px;">Đăng nhập</a>
+        <a href="/auth/register" class="btn btn-outline-primary" style="width: 120px;">Đăng ký</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.js"></script>
+<script>
+    // Dữ liệu các loại sản phẩm và size
+    const productTypes = JSON.parse('<%- JSON.stringify(product.types) %>');
+    const placeholderImg = '/img/product-placeholder.png';
+
+    function getTypeImage(typeObj) {
+        if (typeObj && typeObj.image && typeObj.image.imageData && typeObj.image.imageType) {
+            if (typeObj.image.imageData.$binary && typeObj.image.imageData.$binary.base64) {
+                return `data:${typeObj.image.imageType};base64,${typeObj.image.imageData.$binary.base64}`;
+            } else if (typeof typeObj.image.imageData === 'string') {
+                return `data:${typeObj.image.imageType};base64,${typeObj.image.imageData}`;
+            }
+        }
+        return placeholderImg;
+    }
+
+    function updateSizeAndPrice() {
+        const typeIdx = parseInt(document.getElementById('typeSelect').value, 10);
+        const sizeSelect = document.getElementById('sizeSelect');
+        sizeSelect.innerHTML = '';
+        const details = productTypes[typeIdx]?.detail || [];
+        console.log('DEBUG updateSizeAndPrice:', { productTypes, typeIdx, typeObj: productTypes[typeIdx], details });
+        details.forEach((d, idx) => {
+            const opt = document.createElement('option');
+            opt.value = idx;
+            opt.text = d.size + (d.stock > 0 && d.price > 0 ? '' : ' (Hết hàng)');
+            sizeSelect.appendChild(opt);
+        });
+        // Ưu tiên chọn size đầu tiên còn hàng và có giá > 0
+        if (details.length > 0) {
+            const firstAvailableIdx = details.findIndex(d => d.stock > 0 && d.price > 0);
+            sizeSelect.selectedIndex = firstAvailableIdx !== -1 ? firstAvailableIdx : 0;
+            // Trigger change event so price/stock update for new size
+            sizeSelect.dispatchEvent(new Event('change'));
+        }
+        // If using Nice Select, update it
+        if (window.jQuery && typeof $(sizeSelect).niceSelect === 'function') {
+            $(sizeSelect).niceSelect('update');
+            bindSizeSelectEvents();
+        }
+        if (window.jQuery && typeof $('#typeSelect').niceSelect === 'function') {
+            $('#typeSelect').niceSelect('update');
+            bindTypeSelectEvents(); // Đảm bảo không bị lặp handler
+        }
+        // Update image
+        const imgEl = document.getElementById('mainProductImg');
+        const typeObj = productTypes[typeIdx];
+        imgEl.src = getTypeImage(typeObj);
+    }
+
+    function updatePrice() {
+        const typeIdx = parseInt(document.getElementById('typeSelect').value, 10);
+        const sizeIdx = parseInt(document.getElementById('sizeSelect').value, 10);
+        const details = productTypes[typeIdx]?.detail || [];
+        const detail = details[sizeIdx] || details[0] || { price: 0, stock: 0 };
+        const price = typeof detail.price === 'number' ? detail.price : parseInt(detail.price) || 0;
+        document.getElementById('productPrice').innerText = price.toLocaleString('vi-VN') + '₫';
+        document.getElementById('productStock').innerText = detail.stock;
+    }
+    function updateStockStatus() {
+        const typeIdx = parseInt(document.getElementById('typeSelect').value, 10);
+        const sizeIdx = parseInt(document.getElementById('sizeSelect').value, 10);
+        const details = productTypes[typeIdx]?.detail || [];
+        const detail = details[sizeIdx] || details[0] || { price: 0, stock: 0 };
+        const stock = detail.stock || 0;
+        const price = typeof detail.price === 'number' ? detail.price : parseInt(detail.price) || 0;
+        // Badge trạng thái
+        const badgeSuccess = document.querySelector('.single-product-details .badge-success');
+        const badgeDanger = document.querySelector('.single-product-details .badge-outofstock');
+        if (stock === 0 || price === 0) {
+            if (badgeSuccess) badgeSuccess.style.display = 'none';
+            if (badgeDanger) badgeDanger.style.display = '';
+            // Chỉ thêm class disabled, KHÔNG set thuộc tính disabled
+            document.getElementById('addToCartBtn').classList.add('disabled');
+            document.getElementById('buyNowBtn').classList.add('disabled');
+        } else {
+            if (badgeSuccess) badgeSuccess.style.display = '';
+            if (badgeDanger) badgeDanger.style.display = 'none';
+            document.getElementById('addToCartBtn').classList.remove('disabled');
+            document.getElementById('buyNowBtn').classList.remove('disabled');
+        }
+    }
+    // Gọi khi chọn type/size
+    function updatePriceAndStockStatus() {
+        updatePrice();
+        updateStockStatus();
+    }
+    function bindTypeSelectEvents() {
+        // Remove old event handlers to prevent duplicate binding
+        const typeSelect = document.getElementById('typeSelect');
+        typeSelect.onchange = null;
+        typeSelect.removeEventListener('change', updateSizeAndPrice);
+        typeSelect.addEventListener('change', updateSizeAndPrice);
+        // Nice Select: robustly sync native select and UI
+        if (window.jQuery && typeof $('#typeSelect').niceSelect === 'function') {
+            // Remove previous custom event namespace
+            $('#typeSelect').off('.productTypeSync');
+            // Listen for native select change (for keyboard, programmatic, etc)
+            $('#typeSelect').on('change.productTypeSync', function() {
+                updateSizeAndPrice();
+                // Tự động set filterReviewType về đúng loại đang chọn
+                var typeIdx = $('#typeSelect').val();
+                var typeName = productTypes[typeIdx]?.type || '';
+                var $filter = $('#filterReviewType');
+                if ($filter.length && $filter.val() !== typeName) {
+                    $filter.val(typeName).trigger('change');
+                } else {
+                    fetchReviews();
+                }
+            });
+            // Listen for Nice Select option click
+            const $nice = $('#typeSelect').next('.nice-select');
+            if ($nice.length) {
+                $nice.off('click.productTypeSync');
+                $nice.on('click.productTypeSync', '.option', function(e) {
+                    // Get the value of the clicked option (always string)
+                    var value = $(this).attr('data-value');
+                    if (typeof value === 'undefined') {
+                        // fallback: get index and map to value
+                        var idx = $(this).index();
+                        value = $('#typeSelect option').eq(idx).val();
+                    }
+                    var $select = $('#typeSelect');
+                    if ($select.val() !== value) {
+                        $select.val(value).trigger('change');
+                    }
+                    // Tự động set filterReviewType về đúng loại đang chọn
+                    var typeIdx = value;
+                    var typeName = productTypes[typeIdx]?.type || '';
+                    var $filter = $('#filterReviewType');
+                    if ($filter.length && $filter.val() !== typeName) {
+                        $filter.val(typeName).trigger('change');
+                    } else {
+                        fetchReviews();
+                    }
+                });
+            }
+        }
+    }
+    function bindSizeSelectEvents() {
+        const sizeSelect = document.getElementById('sizeSelect');
+        sizeSelect.onchange = null;
+        sizeSelect.removeEventListener('change', updatePriceAndStockStatus);
+        sizeSelect.addEventListener('change', updatePriceAndStockStatus);
+        if (window.jQuery && typeof $(sizeSelect).niceSelect === 'function') {
+            $(sizeSelect).off('.productSizeSync');
+            $(sizeSelect).on('change.productSizeSync', function() {
+                updatePriceAndStockStatus();
+            });
+            const $nice = $(sizeSelect).next('.nice-select');
+            if ($nice.length) {
+                $nice.off('click.productSizeSync');
+                $nice.on('click.productSizeSync', '.option', function(e) {
+                    var value = $(this).attr('data-value');
+                    if (typeof value === 'undefined') {
+                        var idx = $(this).index();
+                        value = $(sizeSelect).find('option').eq(idx).val();
+                    }
+                    if ($(sizeSelect).val() !== value) {
+                        $(sizeSelect).val(value).trigger('change');
+                    }
+                });
+            }
+        }
+    }
+    // Thay thế addEventListener cũ bằng hàm mới
+    bindTypeSelectEvents();
+    // On page load, update Nice Select và bind lại sự kiện (chỉ 1 lần)
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.jQuery && typeof $('#typeSelect').niceSelect === 'function') {
+            $('#typeSelect').niceSelect('update');
+        }
+        bindTypeSelectEvents();
+        bindSizeSelectEvents();
+    });
+
+    // Kiểm tra trạng thái đăng nhập phía client
+    const isLoggedIn = "<%= currentUser ? 'true' : 'false' %>";
+
+    function showAuthModal() {
+        $('#authModal').modal('show');
+    }
+
+    document.getElementById('buyNowBtn').addEventListener('click', async function(e) {
+        if (this.classList.contains('disabled')) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Sản phẩm đã hết hàng',
+                text: 'Bạn không thể đặt hàng sản phẩm này vì đã hết hàng.',
+                confirmButtonText: 'OK'
+            });
+            e.preventDefault();
+            return;
+        }
+        if (!isLoggedIn) {
+            showAuthModal();
+            return;
+        }
+        const typeIdx = document.getElementById('typeSelect').value;
+        const sizeIdx = document.getElementById('sizeSelect').value;
+        const qty = parseInt(document.getElementById('qtyInput').value) || 1;
+        const type = productTypes[typeIdx]?.type || '';
+        const detail = (productTypes[typeIdx]?.detail || [])[sizeIdx] || {};
+        const price = parseInt(detail.price) || 0;
+        const size = detail.size || '';
+        const typeObj = productTypes[typeIdx];
+        const image = getTypeImage(typeObj);
+        const productId = productTypes[typeIdx]?._id || '<%= product._id %>';
+        // Chuyển hướng sang trang checkout với thông tin sản phẩm
+        const params = new URLSearchParams({
+            buyNow: 1,
+            productId,
+            name: '<%= product.name %>',
+            type,
+            size,
+            price,
+            qty
+        });
+        window.location.href = '/cart/checkout?' + params.toString();
+    });
+
+    document.getElementById('addToCartBtn').addEventListener('click', async function(e) {
+        if (this.classList.contains('disabled')) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Sản phẩm đã hết hàng',
+                text: 'Bạn không thể đặt hàng sản phẩm này vì đã hết hàng.',
+                confirmButtonText: 'OK'
+            });
+            e.preventDefault();
+            return;
+        }
+        if (!isLoggedIn) {
+            showAuthModal();
+            return;
+        }
+        const typeIdx = document.getElementById('typeSelect').value;
+        const sizeIdx = document.getElementById('sizeSelect').value;
+        const qty = parseInt(document.getElementById('qtyInput').value) || 1;
+        const typeObj = productTypes[typeIdx];
+        const image = getTypeImage(typeObj);
+        const productID = productTypes[typeIdx]?._id || '<%= product._id %>';
+        try {
+            const res = await fetch('/cart/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    productID,
+                    orderNumber: qty,
+                    type: productTypes[typeIdx]?.type || '',
+                    size: (productTypes[typeIdx]?.detail || [])[sizeIdx]?.size || '',
+                    image
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sản phẩm đã được thêm vào giỏ hàng!',
+                    showConfirmButton: true,
+                    confirmButtonText: 'OK',
+                    allowOutsideClick: false
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Thêm vào giỏ hàng thất bại!',
+                    text: data.message || '',
+                    showConfirmButton: true
+                });
+            }
+        } catch (err) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi kết nối!',
+                text: 'Không thể thêm vào giỏ hàng. Vui lòng thử lại.',
+                showConfirmButton: true
+            });
+        }
+    });
+
+    // Khởi tạo ban đầu
+    updateSizeAndPrice();
+    updateStockStatus();
+    // Đảm bảo Nice Select đã update và event đã bind trước khi trigger change
+    if (window.jQuery && typeof $('#typeSelect').niceSelect === 'function') {
+        $('#typeSelect').niceSelect('update');
+    }
+    bindTypeSelectEvents();
+    bindSizeSelectEvents();
+    // Chọn type đầu tiên và trigger update (nếu chưa được chọn)
+    const typeSelect = document.getElementById('typeSelect');
+    if (typeSelect.options.length > 0) {
+        typeSelect.selectedIndex = 0;
+        typeSelect.dispatchEvent(new Event('change'));
+    }
+    // Chọn size đầu tiên và trigger update (nếu chưa được chọn)
+    const sizeSelect = document.getElementById('sizeSelect');
+    if (sizeSelect.options.length > 0) {
+        sizeSelect.selectedIndex = 0;
+        sizeSelect.dispatchEvent(new Event('change'));
+    }
+
+    // Duy trì số lượng sản phẩm trong giỏ hàng
+    const qtyInput = document.getElementById('qtyInput');
+    let initialQty = parseInt(qtyInput.value) || 1;
+    qtyInput.addEventListener('change', function() {
+        let val = parseInt(this.value);
+        if (isNaN(val) || val < 1) {
+            this.value = initialQty;
+        } else {
+            initialQty = val;
+        }
+    });
+    // Thay thế input số lượng bằng nút + - hiện đại
+    document.getElementById('qtyDown').onclick = function() {
+        const input = document.getElementById('qtyInput');
+        let val = parseInt(input.value) || 1;
+        if (val > 1) input.value = val - 1;
+    };
+    document.getElementById('qtyUp').onclick = function() {
+        const input = document.getElementById('qtyInput');
+        let val = parseInt(input.value) || 1;
+        input.value = val + 1;
+    };
+
+    // Đánh giá sản phẩm
+    const reviewTab = document.getElementById('review-tab');
+    const productId = '<%= product._id %>';
+    const reviewList = document.getElementById('reviewList');
+    let allReviews = [];
+    let currentReviewPage = 1;
+    const REVIEWS_PER_PAGE = 5;
+    function renderReviews(reviews) {
+      const filterType = document.getElementById('filterReviewType').value;
+      let filtered = reviews;
+      if (filterType && filterType !== 'all') {
+        filtered = reviews.filter(r => r.type === filterType);
+      }
+      if (!filtered.length) {
+        reviewList.innerHTML = '<div class="review-modern-empty">Chưa có đánh giá nào cho loại này.</div>';
+        document.getElementById('reviewPagination')?.remove();
+        return;
+      }
+      // Phân trang
+      const totalPages = Math.ceil(filtered.length / REVIEWS_PER_PAGE);
+      if (currentReviewPage > totalPages) currentReviewPage = totalPages || 1;
+      const startIdx = (currentReviewPage - 1) * REVIEWS_PER_PAGE;
+      const endIdx = startIdx + REVIEWS_PER_PAGE;
+      const pageReviews = filtered.slice(startIdx, endIdx);
+      reviewList.innerHTML = pageReviews.map(r => `
+        <div class="review-modern-box">
+          <div class="review-modern-header">
+            <span class="review-modern-username">${r.username || 'Ẩn danh'}</span>
+            <span class="review-modern-stars">${'★'.repeat(r.star)}${'☆'.repeat(5-r.star)}</span>
+            <span class="review-modern-time">${r.createdAt ? new Date(r.createdAt).toLocaleString('vi-VN') : ''}</span>
+            <span class="badge badge-light ml-2">${r.type ? r.type : ''}</span>
+          </div>
+          <div class="review-modern-comment">${r.comment}</div>
+        </div>
+      `).join('');
+      // Render pagination
+      let paginationHtml = '';
+      if (totalPages > 1) {
+        paginationHtml = '<nav id="reviewPagination" class="mt-3"><ul class="pagination justify-content-center">';
+        for (let i = 1; i <= totalPages; i++) {
+          paginationHtml += `<li class="page-item${i === currentReviewPage ? ' active' : ''}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
+        }
+        paginationHtml += '</ul></nav>';
+      }
+      // Nếu đã có pagination thì thay thế, chưa có thì thêm sau reviewList
+      let oldPag = document.getElementById('reviewPagination');
+      if (oldPag) oldPag.outerHTML = paginationHtml;
+      else reviewList.insertAdjacentHTML('afterend', paginationHtml);
+      // Gán sự kiện click cho page-link
+      document.querySelectorAll('#reviewPagination .page-link').forEach(link => {
+        link.onclick = function(e) {
+          e.preventDefault();
+          const page = parseInt(this.dataset.page);
+          if (page !== currentReviewPage) {
+            currentReviewPage = page;
+            renderReviews(allReviews);
+          }
+        };
+      });
+    }
+    async function fetchReviews() {
+      reviewList.innerHTML = '<div class="text-center text-muted">Đang tải đánh giá...</div>';
+      const filterType = document.getElementById('filterReviewType').value;
+      let url = '';
+      if (filterType === 'all') {
+        // Gọi API lấy tất cả review mọi type theo tên sản phẩm
+        url = `/review/by-name/<%= encodeURIComponent(product.name) %>`;
+      } else {
+        // Lấy _id của biến thể theo type
+        let productTypeId = null;
+        for (let i = 0; i < productTypes.length; i++) {
+          if (productTypes[i].type === filterType) {
+            productTypeId = productTypes[i]._id;
+            break;
+          }
+        }
+        if (!productTypeId) {
+          reviewList.innerHTML = '<div class="text-danger">Không xác định được loại sản phẩm.</div>';
+          return;
+        }
+        url = `/review/${productTypeId}`;
+      }
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.success) {
+          allReviews = data.reviews;
+          renderReviews(allReviews);
+        } else reviewList.innerHTML = '<div class="text-danger">Không thể tải đánh giá.</div>';
+      } catch {
+        reviewList.innerHTML = '<div class="text-danger">Lỗi kết nối.</div>';
+      }
+    }
+    document.getElementById('filterReviewType').addEventListener('change', fetchReviews);
+    // Star rating UI nâng cấp với nhãn
+    const starRatingGroup = document.getElementById('starRatingGroup');
+    if (starRatingGroup) {
+      let lastStar = 0;
+      const stars = starRatingGroup.querySelectorAll('.star-icon');
+      stars.forEach((starEl, idx) => {
+        starEl.addEventListener('mouseover', function() {
+          stars.forEach((el, i) => {
+            el.className = i <= idx ? 'fa fa-star star-icon hovered' : 'fa fa-star-o star-icon';
+            el.style.color = i <= idx ? '#ffb400' : '#bbb';
+          });
+        });
+        starEl.addEventListener('mouseout', function() {
+          stars.forEach((el, i) => {
+            el.className = i < lastStar ? 'fa fa-star star-icon selected' : 'fa fa-star-o star-icon';
+            el.style.color = i < lastStar ? '#ffb400' : '#bbb';
+          });
+        });
+        starEl.addEventListener('click', function() {
+          lastStar = idx + 1;
+          document.getElementById('reviewStar').value = lastStar;
+          stars.forEach((el, i) => {
+            el.className = i < lastStar ? 'fa fa-star star-icon selected' : 'fa fa-star-o star-icon';
+            el.style.color = i < lastStar ? '#ffb400' : '#bbb';
+          });
+        });
+      });
+    }
+    // Gửi đánh giá
+    const reviewForm = document.getElementById('reviewForm');
+    if (reviewForm) {
+      reviewForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const type = document.getElementById('reviewType').value;
+        const star = parseInt(document.getElementById('reviewStar').value, 10);
+        const comment = document.getElementById('reviewComment').value.trim();
+        // Lấy _id của biến thể (type) đang chọn
+        let productTypeId = null;
+        for (let i = 0; i < productTypes.length; i++) {
+          if (productTypes[i].type === type) {
+            productTypeId = productTypes[i]._id;
+            break;
+          }
+        }
+        if (!type) return Swal.fire('Vui lòng chọn loại sản phẩm muốn đánh giá!');
+        if (!star || star < 1) return Swal.fire('Vui lòng chọn số sao đánh giá!');
+        if (!comment) return Swal.fire('Vui lòng nhập bình luận!');
+        if (!productTypeId) return Swal.fire('Không xác định được loại sản phẩm!');
+        try {
+          const res = await fetch(`/review/${productTypeId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type, star, comment })
+          });
+          const data = await res.json();
+          if (data.success) {
+            Swal.fire('Đánh giá của bạn đã được gửi!', '', 'success');
+            reviewForm.reset();
+            document.getElementById('reviewStar').value = 0;
+            Array.from(document.querySelectorAll('#starRatingGroup .star-icon')).forEach(el => el.className = 'fa fa-star-o star-icon');
+            fetchReviews();
+          } else {
+            Swal.fire(data.message || 'Gửi đánh giá thất bại!', '', 'error');
+          }
+        } catch {
+          Swal.fire('Lỗi kết nối!', '', 'error');
+        }
+      });
+    }
+    // Tải đánh giá khi vào tab
+    const reviewTabBtn = document.getElementById('review-tab');
+    if (reviewTabBtn) {
+      reviewTabBtn.addEventListener('click', fetchReviews);
+    }
+    if (window.location.hash === '#review') fetchReviews();
+
+    // Fix select[required] bị display:none khi dùng custom select (Nice Select)
+document.querySelectorAll('select[required]').forEach(function(sel) {
+  if (sel.style.display === 'none') {
+    sel.style.display = '';
+    sel.style.opacity = 0;
+    sel.style.position = 'absolute';
+    sel.style.left = '-9999px';
+    sel.style.width = '1px';
+    sel.style.height = '1px';
+    sel.style.pointerEvents = 'none';
+  }
+});
+// Wishlist button logic (đồng bộ với product_list)
+$(document).on('click', '.wishlist-btn', function(e) {
+    e.preventDefault();
+    var $btn = $(this);
+    var productId = $btn.data('product-id');
+    if (isLoggedIn !== 'true') {
+        showAuthModal();
+        return;
+    }
+    $.ajax({
+        url: '/products/wishlist/toggle',
+        method: 'POST',
+        data: { productId: productId },
+        success: function(res) {
+            if (res.success) {
+                $btn.toggleClass('active', res.action === 'added');
+                $btn.attr('title', res.action === 'added' ? 'Bỏ khỏi yêu thích' : 'Thêm vào yêu thích');
+            } else {
+                Swal.fire(res.message || 'Có lỗi xảy ra!', '', 'error');
+            }
+        },
+        error: function(xhr) {
+            if (xhr.status === 401) {
+                showAuthModal();
+            } else {
+                Swal.fire('Có lỗi xảy ra!', '', 'error');
+            }
+        }
+    });
+});
+</script>
+<%- include('../partials/footer') %>
