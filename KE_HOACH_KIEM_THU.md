@@ -376,3 +376,65 @@ Hướng dẫn chi tiết về điều kiện cài đặt, cách chạy riêng t
 Kế hoạch được xem là được chấp thuận để thực hiện khi phạm vi, yêu cầu, môi trường, dữ liệu, tiêu chí nghiệm thu và trách nhiệm đã được thống nhất; các công cụ cần thiết có thể hoạt động; và không còn nội dung chưa xác định ảnh hưởng đến cách đánh giá kết quả.
 
 Mọi thay đổi quan trọng về phạm vi, tiêu chí đạt, số lượng ca hoặc môi trường sau thời điểm ban hành phải được ghi nhận trong lịch sử phiên bản và phản ánh đồng thời trong ma trận truy vết cùng báo cáo kết quả.
+
+## 22. Kết quả thực nghiệm tổng hợp
+
+Bộ kiểm thử cấp báo cáo gồm 94 ca. Kết quả được giữ nguyên theo quan sát thực nghiệm; trạng thái Chưa đạt thể hiện phần mềm có ít nhất một sai lệch so với kết quả mong đợi, không có nghĩa bộ kiểm thử bị hỏng.
+
+| Nhóm kiểm thử | Quy mô | Đạt | Chưa đạt | Tỷ lệ đạt |
+|---|---:|---:|---:|---:|
+| Hộp đen | 36 ca | 25 | 11 | 69,44% |
+| Hộp trắng | 18 ca | 17 | 1 | 94,44% |
+| Selenium | 8 ca | 5 | 3 | 62,50% |
+| Postman/Newman | 24 ca | 15 | 9 | 62,50% |
+| Nâng cao và bảo mật | 8 ca | 2 | 6 | 25,00% |
+| **Tổng cộng** | **94 ca** | **64** | **30** | **68,09%** |
+
+Kết quả Jest gồm 134/134 phép kiểm tra đạt. Độ phủ mã nguồn trong phạm vi đo đạt 100% dòng, 99,92% câu lệnh, 99,44% hàm và 82,62% nhánh. Chỉ tiêu nhánh 85% chưa đạt và được ghi nhận là giới hạn còn lại của bộ kiểm thử hộp trắng.
+
+Đối với Apache JMeter, các mức 20, 50, 100 và 200 người dùng đồng thời đạt tiêu chí 0% lỗi và p95 không quá 5.000 ms. Mức 500 người dùng ghi nhận 1.240/1.500 yêu cầu thành công và 260 yêu cầu lỗi, tương đương tỷ lệ lỗi 17,33%, nên được kết luận Chưa đạt trong môi trường thử nghiệm cục bộ.
+
+## 23. Minh chứng tiêu biểu
+
+Toàn bộ ảnh được lưu trong thư mục `minh-chung`. Các ảnh dưới đây đại diện cho từng nhóm kiểm thử chính.
+
+### 23.1. Giao diện hệ thống
+
+![Trang chủ Website bán quần áo](minh-chung/MC-HOME-01.png)
+
+### 23.2. Jest và độ phủ hộp trắng
+
+![Kết quả Jest Coverage](minh-chung/MC-WB-COVERAGE-1.png)
+
+![Báo cáo độ phủ đầy đủ](minh-chung/MC-JEST-COVERAGE-FULL.png)
+
+### 23.3. Selenium trên Chrome và Firefox
+
+![Tổng hợp Selenium Chrome](minh-chung/MC-SELENIUM-CHROME-1.png)
+
+![Tổng hợp Selenium Firefox](minh-chung/MC-SELENIUM-FIREFOX-1.png)
+
+### 23.4. Postman và Newman
+
+![Tổng hợp kiểm thử Postman](minh-chung/MC-PM-SUMMARY-1.png)
+
+### 23.5. Apache JMeter
+
+![Bảng tổng hợp kiểm thử tải](minh-chung/MC-JMETER-SUMMARY.png)
+
+![Dashboard JMeter ở mức 500 người dùng](minh-chung/MC-JMETER-500-DASHBOARD.png)
+
+## 24. Quy ước lưu trữ minh chứng và giới hạn kết luận
+
+Tên ảnh cho phép truy vết đến nhóm và mã ca tương ứng:
+
+- `MC-BB-xx`: kiểm thử hộp đen.
+- `MC-WB-xx`: kiểm thử hộp trắng hoặc độ phủ Jest.
+- `MC-UI-xx`: kiểm thử giao diện Selenium.
+- `MC-PM-xx`: kiểm thử API Postman/Newman.
+- `MC-ADV-xx`: kiểm thử nâng cao và bảo mật.
+- `MC-JMETER-xx`: kiểm thử tải.
+
+Ảnh minh chứng chỉ ghi nhận trạng thái tại bước được chụp. Kết luận Đạt hoặc Chưa đạt được xác định từ toàn bộ bước kiểm tra, assertion và dữ liệu đối chiếu của ca, không chỉ từ một ảnh riêng lẻ.
+
+Kết quả tải và tương thích phản ánh cấu hình máy, phiên bản trình duyệt và môi trường cục bộ tại thời điểm thực hiện. Kết quả không được suy rộng thành năng lực của hệ thống production có cấu hình khác. Các lỗi được giữ nguyên để phục vụ đánh giá rủi ro, tái kiểm thử và đề xuất khắc phục.
